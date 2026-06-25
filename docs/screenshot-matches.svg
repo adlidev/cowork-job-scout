@@ -1,0 +1,97 @@
+<svg width="900" height="560" viewBox="0 0 900 560" xmlns="http://www.w3.org/2000/svg" font-family="system-ui,-apple-system,sans-serif">
+<rect width="900" height="600" fill="#f0f4f8"/>
+<rect x="16" y="16" width="868" height="64" fill="#ffffff" rx="10" stroke="#e2e8f0" stroke-width="1"/>
+<text x="32" y="56" font-size="19" fill="#1A3A5C" font-weight="700" text-anchor="start" font-family="system-ui,-apple-system,sans-serif">🎯 Job Match Dashboard</text>
+<rect x="720" y="26" width="135.2" height="22" fill="#dbeafe" rx="12" stroke="none"/><text x="787.6" y="41" font-size="11" fill="#1d4ed8" font-weight="600" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif">📅 Daily · Jun 25</text>
+<text x="20" y="101" font-size="12" fill="#888888" font-weight="400" text-anchor="start" font-family="system-ui,-apple-system,sans-serif">13 matched roles from Dice · Indeed · ZipRecruiter</text>
+<rect x="16" y="112" width="868" height="40" fill="#ffffff" rx="8" stroke="#e2e8f0" stroke-width="1"/>
+<rect x="24" y="116" width="87" height="32" fill="#1A3A5C" rx="6" stroke="none" stroke-width="1"/>
+<text x="67.5" y="136" font-size="12.5" fill="#ffffff" font-weight="600" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif">Matches</text>
+<text x="194.0" y="136" font-size="12.5" fill="#64748b" font-weight="400" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif">Job Search Log</text>
+<text x="320.5" y="136" font-size="12.5" fill="#64748b" font-weight="400" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif">Resumes</text>
+<text x="429.0" y="136" font-size="12.5" fill="#64748b" font-weight="400" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif">⚙ Settings</text>
+<rect x="744" y="118" width="132" height="30" fill="#ffffff" rx="6" stroke="#94a3b8" stroke-width="1"/>
+<text x="810" y="137" font-size="12" fill="#475569" font-weight="400" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif">🔍 Live Search</text>
+<rect x="16" y="158" width="868" height="36" fill="#ffffff" rx="8" stroke="#e2e8f0" stroke-width="1"/>
+<text x="32" y="180" font-size="11" fill="#1d4ed8" font-weight="600" text-anchor="start" font-family="system-ui,-apple-system,sans-serif">Dice</text>
+<text x="57" y="180" font-size="11" fill="#475569" font-weight="400" text-anchor="start" font-family="system-ui,-apple-system,sans-serif">5</text>
+<text x="80" y="180" font-size="11" fill="#cbd5e1" font-weight="400" text-anchor="start" font-family="system-ui,-apple-system,sans-serif">·</text>
+<text x="94" y="180" font-size="11" fill="#065f46" font-weight="600" text-anchor="start" font-family="system-ui,-apple-system,sans-serif">Indeed</text>
+<text x="131" y="180" font-size="11" fill="#475569" font-weight="400" text-anchor="start" font-family="system-ui,-apple-system,sans-serif">3</text>
+<text x="147" y="180" font-size="11" fill="#cbd5e1" font-weight="400" text-anchor="start" font-family="system-ui,-apple-system,sans-serif">·</text>
+<text x="162" y="180" font-size="11" fill="#6d28d9" font-weight="600" text-anchor="start" font-family="system-ui,-apple-system,sans-serif">ZipRecruiter</text>
+<text x="229" y="180" font-size="11" fill="#475569" font-weight="400" text-anchor="start" font-family="system-ui,-apple-system,sans-serif">5</text>
+<rect x="16" y="200" width="868" height="32" fill="#f8fafc" rx="0" stroke="#e2e8f0" stroke-width="1"/>
+<text x="36" y="220" font-size="11" fill="#64748b" font-weight="600" text-anchor="start" font-family="system-ui,-apple-system,sans-serif">Score</text>
+<text x="110" y="220" font-size="11" fill="#64748b" font-weight="600" text-anchor="start" font-family="system-ui,-apple-system,sans-serif">Role</text>
+<text x="350" y="220" font-size="11" fill="#64748b" font-weight="600" text-anchor="start" font-family="system-ui,-apple-system,sans-serif">Company</text>
+<text x="518" y="220" font-size="11" fill="#64748b" font-weight="600" text-anchor="start" font-family="system-ui,-apple-system,sans-serif">Type</text>
+<text x="608" y="220" font-size="11" fill="#64748b" font-weight="600" text-anchor="start" font-family="system-ui,-apple-system,sans-serif">Salary</text>
+<text x="728" y="220" font-size="11" fill="#64748b" font-weight="600" text-anchor="start" font-family="system-ui,-apple-system,sans-serif">Posted</text>
+<rect x="16" y="232" width="868" height="50" fill="#ffffff" rx="0" stroke="#e2e8f0" stroke-width="1"/>
+<circle cx="52" cy="257" r="16" fill="#15803d" stroke="none"/><text x="52" y="262" font-size="13" fill="white" font-weight="700" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif">9</text>
+<text x="110" y="252" font-size="12.5" fill="#1e293b" font-weight="600" text-anchor="start" font-family="system-ui,-apple-system,sans-serif">SDET, Backend</text>
+<text x="110" y="268" font-size="11" fill="#64748b" font-weight="400" text-anchor="start" font-family="system-ui,-apple-system,sans-serif">Quanata</text>
+<rect x="518" y="244" width="59.2" height="20" fill="#dcfce7" rx="10" stroke="none"/><text x="547.6" y="258" font-size="11" fill="#15803d" font-weight="600" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif">Remote</text>
+<text x="608" y="260" font-size="12" fill="#1e293b" font-weight="500" text-anchor="start" font-family="system-ui,-apple-system,sans-serif">$222k+</text>
+<text x="728" y="260" font-size="12" fill="#64748b" font-weight="400" text-anchor="start" font-family="system-ui,-apple-system,sans-serif">Today</text>
+<rect x="810" y="242" width="60" height="28" fill="#1A3A5C" rx="6" stroke="none" stroke-width="1"/>
+<text x="840" y="260" font-size="11" fill="white" font-weight="600" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif">Apply</text>
+<rect x="876" y="242" width="28" height="28" fill="#fee2e2" rx="6" stroke="none" stroke-width="1"/>
+<text x="890" y="260" font-size="12" fill="#dc2626" font-weight="400" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif">✕</text>
+<rect x="16" y="282" width="868" height="50" fill="#f9fafb" rx="0" stroke="#e2e8f0" stroke-width="1"/>
+<circle cx="52" cy="307" r="16" fill="#16a34a" stroke="none"/><text x="52" y="312" font-size="13" fill="white" font-weight="700" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif">8</text>
+<text x="110" y="302" font-size="12.5" fill="#1e293b" font-weight="600" text-anchor="start" font-family="system-ui,-apple-system,sans-serif">Senior SDET – Automation QE</text>
+<text x="110" y="318" font-size="11" fill="#64748b" font-weight="400" text-anchor="start" font-family="system-ui,-apple-system,sans-serif">Irvine Technology Corp</text>
+<rect x="518" y="294" width="59.2" height="20" fill="#dcfce7" rx="10" stroke="none"/><text x="547.6" y="308" font-size="11" fill="#15803d" font-weight="600" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif">Remote</text>
+<text x="608" y="310" font-size="12" fill="#1e293b" font-weight="500" text-anchor="start" font-family="system-ui,-apple-system,sans-serif">$125k–$145k</text>
+<text x="728" y="310" font-size="12" fill="#64748b" font-weight="400" text-anchor="start" font-family="system-ui,-apple-system,sans-serif">Jun 24</text>
+<rect x="810" y="292" width="60" height="28" fill="#1A3A5C" rx="6" stroke="none" stroke-width="1"/>
+<text x="840" y="310" font-size="11" fill="white" font-weight="600" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif">Apply</text>
+<rect x="876" y="292" width="28" height="28" fill="#fee2e2" rx="6" stroke="none" stroke-width="1"/>
+<text x="890" y="310" font-size="12" fill="#dc2626" font-weight="400" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif">✕</text>
+<rect x="16" y="332" width="868" height="50" fill="#ffffff" rx="0" stroke="#e2e8f0" stroke-width="1"/>
+<circle cx="52" cy="357" r="16" fill="#16a34a" stroke="none"/><text x="52" y="362" font-size="13" fill="white" font-weight="700" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif">8</text>
+<text x="110" y="352" font-size="12.5" fill="#1e293b" font-weight="600" text-anchor="start" font-family="system-ui,-apple-system,sans-serif">Sr QA Engineer</text>
+<text x="110" y="368" font-size="11" fill="#64748b" font-weight="400" text-anchor="start" font-family="system-ui,-apple-system,sans-serif">Forward Financing</text>
+<rect x="518" y="344" width="59.2" height="20" fill="#dcfce7" rx="10" stroke="none"/><text x="547.6" y="358" font-size="11" fill="#15803d" font-weight="600" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif">Remote</text>
+<text x="608" y="360" font-size="12" fill="#1e293b" font-weight="500" text-anchor="start" font-family="system-ui,-apple-system,sans-serif">$120k–$135k</text>
+<text x="728" y="360" font-size="12" fill="#64748b" font-weight="400" text-anchor="start" font-family="system-ui,-apple-system,sans-serif">Jun 6</text>
+<rect x="810" y="342" width="60" height="28" fill="#1A3A5C" rx="6" stroke="none" stroke-width="1"/>
+<text x="840" y="360" font-size="11" fill="white" font-weight="600" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif">Apply</text>
+<rect x="876" y="342" width="28" height="28" fill="#fee2e2" rx="6" stroke="none" stroke-width="1"/>
+<text x="890" y="360" font-size="12" fill="#dc2626" font-weight="400" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif">✕</text>
+<rect x="16" y="382" width="868" height="50" fill="#f9fafb" rx="0" stroke="#e2e8f0" stroke-width="1"/>
+<circle cx="52" cy="407" r="16" fill="#2563eb" stroke="none"/><text x="52" y="412" font-size="13" fill="white" font-weight="700" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif">7</text>
+<text x="110" y="402" font-size="12.5" fill="#1e293b" font-weight="600" text-anchor="start" font-family="system-ui,-apple-system,sans-serif">Senior Engineer, Software QA</text>
+<text x="110" y="418" font-size="11" fill="#64748b" font-weight="400" text-anchor="start" font-family="system-ui,-apple-system,sans-serif">Maximus, Inc.</text>
+<rect x="518" y="394" width="59.2" height="20" fill="#dcfce7" rx="10" stroke="none"/><text x="547.6" y="408" font-size="11" fill="#15803d" font-weight="600" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif">Remote</text>
+<text x="608" y="410" font-size="12" fill="#1e293b" font-weight="500" text-anchor="start" font-family="system-ui,-apple-system,sans-serif">$102,720/yr</text>
+<text x="728" y="410" font-size="12" fill="#64748b" font-weight="400" text-anchor="start" font-family="system-ui,-apple-system,sans-serif">Today</text>
+<rect x="810" y="392" width="60" height="28" fill="#1A3A5C" rx="6" stroke="none" stroke-width="1"/>
+<text x="840" y="410" font-size="11" fill="white" font-weight="600" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif">Apply</text>
+<rect x="876" y="392" width="28" height="28" fill="#fee2e2" rx="6" stroke="none" stroke-width="1"/>
+<text x="890" y="410" font-size="12" fill="#dc2626" font-weight="400" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif">✕</text>
+<rect x="16" y="432" width="868" height="50" fill="#ffffff" rx="0" stroke="#e2e8f0" stroke-width="1"/>
+<circle cx="52" cy="457" r="16" fill="#2563eb" stroke="none"/><text x="52" y="462" font-size="13" fill="white" font-weight="700" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif">7</text>
+<text x="110" y="452" font-size="12.5" fill="#1e293b" font-weight="600" text-anchor="start" font-family="system-ui,-apple-system,sans-serif">Software Engineer (QA/SDET Focus)</text>
+<text x="110" y="468" font-size="11" fill="#64748b" font-weight="400" text-anchor="start" font-family="system-ui,-apple-system,sans-serif">UnitedHealth Group</text>
+<rect x="518" y="444" width="59.2" height="20" fill="#dcfce7" rx="10" stroke="none"/><text x="547.6" y="458" font-size="11" fill="#15803d" font-weight="600" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif">Remote</text>
+<text x="608" y="460" font-size="12" fill="#1e293b" font-weight="500" text-anchor="start" font-family="system-ui,-apple-system,sans-serif">$72k–$130k</text>
+<text x="728" y="460" font-size="12" fill="#64748b" font-weight="400" text-anchor="start" font-family="system-ui,-apple-system,sans-serif">Jun 23</text>
+<rect x="810" y="442" width="60" height="28" fill="#1A3A5C" rx="6" stroke="none" stroke-width="1"/>
+<text x="840" y="460" font-size="11" fill="white" font-weight="600" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif">Apply</text>
+<rect x="876" y="442" width="28" height="28" fill="#fee2e2" rx="6" stroke="none" stroke-width="1"/>
+<text x="890" y="460" font-size="12" fill="#dc2626" font-weight="400" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif">✕</text>
+<rect x="16" y="482" width="868" height="50" fill="#f9fafb" rx="0" stroke="#e2e8f0" stroke-width="1"/>
+<circle cx="52" cy="507" r="16" fill="#d97706" stroke="none"/><text x="52" y="512" font-size="13" fill="white" font-weight="700" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif">6</text>
+<text x="110" y="502" font-size="12.5" fill="#1e293b" font-weight="600" text-anchor="start" font-family="system-ui,-apple-system,sans-serif">Test Automation Engineer – Gov</text>
+<text x="110" y="518" font-size="11" fill="#64748b" font-weight="400" text-anchor="start" font-family="system-ui,-apple-system,sans-serif">Viasat, Inc.</text>
+<rect x="518" y="494" width="59.2" height="20" fill="#dcfce7" rx="10" stroke="none"/><text x="547.6" y="508" font-size="11" fill="#15803d" font-weight="600" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif">Remote</text>
+<text x="608" y="510" font-size="12" fill="#1e293b" font-weight="500" text-anchor="start" font-family="system-ui,-apple-system,sans-serif">$149k–$224k</text>
+<text x="728" y="510" font-size="12" fill="#64748b" font-weight="400" text-anchor="start" font-family="system-ui,-apple-system,sans-serif">May 29</text>
+<rect x="810" y="492" width="60" height="28" fill="#1A3A5C" rx="6" stroke="none" stroke-width="1"/>
+<text x="840" y="510" font-size="11" fill="white" font-weight="600" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif">Apply</text>
+<rect x="876" y="492" width="28" height="28" fill="#fee2e2" rx="6" stroke="none" stroke-width="1"/>
+<text x="890" y="510" font-size="12" fill="#dc2626" font-weight="400" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif">✕</text>
+</svg>

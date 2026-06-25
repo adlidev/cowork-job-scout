@@ -1423,6 +1423,7 @@ function tailorResume(guid) {
   const salaryPart = job.salary ? `\nSalary: ${job.salary}` : '';
   const typePart   = (job.workplaceTypes||[]).join('/') || (job.isRemote ? 'Remote' : '');
   const safeName   = job.companyName.replace(/[^a-zA-Z0-9]/g,'');
+  const namePrefix = (getSettings().candidateName || 'YourName').split(' ').join('');
   const prompt = `Please tailor my resume for this job and save it as a Word document (.docx) and PDF in my jobsearch folder.
 
 Job details:
@@ -1432,27 +1433,39 @@ Job details:
 
 Instructions:
 1. Fetch the job listing URL above to get the full job description (if a URL is provided).
-2. Review my base resume at /Users/adli/Documents/Claude/jobsearch/ — look for the most recent general base resume DOCX (not one already tailored for another company).
-3. Tailor the resume: adjust the profile summary, reorder or reword bullets to emphasize skills most relevant to this specific role, and ensure keywords from the job description appear naturally.
-4. Save the tailored resume as both .docx and .pdf named: YourName_resume_${safeName}.docx / YourName_resume_${safeName}.pdf
-5. Share the files with me when done.`;
+2. Look in my jobsearch folder for my base resume — a .docx file that is a general master resume (not already tailored for another company). If you cannot find one, stop and tell me: describe what you looked for and ask me to point you to my base resume or confirm its filename.
+3. Tailor the resume: adjust the profile summary, reorder or reword bullets to emphasize skills most relevant to this specific role, and ensure keywords from the job description appear naturally. Do not fabricate experience.
+4. Save the tailored resume as both .docx and .pdf named: ${namePrefix}_resume_${safeName}.docx / ${namePrefix}_resume_${safeName}.pdf in resumes/archived/ (create the folder if it doesn't exist).
+5. Add it to the Resumes tab in the dashboard and share the files when done.`;
   document.getElementById('modal-title').textContent = `Tailor resume — ${job.title} at ${job.companyName}`;
   document.getElementById('modal-prompt').value = prompt;
-  document.getElementById('btn-copy').textContent = 'Copy prompt';
-  document.getElementById('btn-copy').classList.remove('copied');
   document.getElementById('tailor-modal').classList.add('open');
+  // Auto-copy when modal opens
+  const btn = document.getElementById('btn-copy');
+  const sub = document.querySelector('#tailor-modal .modal-sub');
+  btn.textContent = 'Copy prompt'; btn.classList.remove('copied');
+  try {
+    navigator.clipboard.writeText(prompt).then(() => {
+      sub.textContent = '✓ Copied — paste into your Claude chat to start tailoring.';
+    }).catch(() => {
+      sub.textContent = 'Copy the prompt below and paste it into your Claude chat.';
+    });
+  } catch {
+    sub.textContent = 'Copy the prompt below and paste it into your Claude chat.';
+  }
 }
 
 function closeModal() { document.getElementById('tailor-modal').classList.remove('open'); }
 
 function copyPrompt() {
-  const ta = document.getElementById('modal-prompt');
-  ta.select();
-  try { navigator.clipboard.writeText(ta.value).catch(() => document.execCommand('copy')); }
-  catch { document.execCommand('copy'); }
-  const btn = document.getElementById('btn-copy');
-  btn.textContent = '✓ Copied!'; btn.classList.add('copied');
-  setTimeout(() => { btn.textContent = 'Copy prompt'; btn.classList.remove('copied'); }, 2000);
+  const prompt = document.getElementById('modal-prompt').value;
+  const btn    = document.getElementById('btn-copy');
+  try {
+    navigator.clipboard.writeText(prompt).then(() => {
+      btn.textContent = '✓ Copied!'; btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy prompt'; btn.classList.remove('copied'); }, 2000);
+    }).catch(() => { try { document.execCommand('copy'); } catch {} });
+  } catch { try { document.execCommand('copy'); } catch {} }
 }
 
 // ─── Utilities ────────────────────────────────────────────────────────────────

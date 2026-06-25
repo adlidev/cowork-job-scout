@@ -1,0 +1,62 @@
+<svg width="900" height="520" viewBox="0 0 900 520" xmlns="http://www.w3.org/2000/svg" font-family="system-ui,-apple-system,sans-serif">
+<rect width="900" height="600" fill="#f0f4f8"/>
+<rect x="16" y="16" width="868" height="64" fill="#ffffff" rx="10" stroke="#e2e8f0" stroke-width="1"/>
+<text x="32" y="56" font-size="19" fill="#1A3A5C" font-weight="700" text-anchor="start" font-family="system-ui,-apple-system,sans-serif">🎯 Job Match Dashboard</text>
+<rect x="720" y="26" width="135.2" height="22" fill="#dbeafe" rx="12" stroke="none"/><text x="787.6" y="41" font-size="11" fill="#1d4ed8" font-weight="600" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif">📅 Daily · Jun 25</text>
+<text x="20" y="101" font-size="12" fill="#888888" font-weight="400" text-anchor="start" font-family="system-ui,-apple-system,sans-serif">12 activities logged</text>
+<rect x="16" y="112" width="868" height="40" fill="#ffffff" rx="8" stroke="#e2e8f0" stroke-width="1"/>
+<text x="67.5" y="136" font-size="12.5" fill="#64748b" font-weight="400" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif">Matches</text>
+<rect x="119" y="116" width="150" height="32" fill="#1A3A5C" rx="6" stroke="none" stroke-width="1"/>
+<text x="194.0" y="136" font-size="12.5" fill="#ffffff" font-weight="600" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif">Job Search Log</text>
+<text x="320.5" y="136" font-size="12.5" fill="#64748b" font-weight="400" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif">Resumes</text>
+<text x="429.0" y="136" font-size="12.5" fill="#64748b" font-weight="400" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif">⚙ Settings</text>
+<rect x="724" y="118" width="152" height="30" fill="#1A3A5C" rx="6" stroke="none" stroke-width="1"/>
+<text x="800" y="137" font-size="12" fill="white" font-weight="600" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif">+ Log Activity</text>
+<rect x="16" y="158" width="868" height="44" fill="white" rx="8" stroke="#e2e8f0" stroke-width="1"/>
+<text x="32" y="176" font-size="11" fill="#64748b" font-weight="600" text-anchor="start" font-family="system-ui,-apple-system,sans-serif">Weekly Goal</text>
+<rect x="130" y="163" width="22" height="22" fill="#1A3A5C" rx="4" stroke="none" stroke-width="1"/>
+<text x="141" y="178" font-size="11" fill="white" font-weight="400" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif">✓</text>
+<rect x="158" y="163" width="22" height="22" fill="#1A3A5C" rx="4" stroke="none" stroke-width="1"/>
+<text x="169" y="178" font-size="11" fill="white" font-weight="400" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif">✓</text>
+<rect x="186" y="163" width="22" height="22" fill="#1A3A5C" rx="4" stroke="none" stroke-width="1"/>
+<text x="197" y="178" font-size="11" fill="white" font-weight="400" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif">✓</text>
+<rect x="214" y="163" width="22" height="22" fill="#e2e8f0" rx="4" stroke="none" stroke-width="1"/>
+<rect x="242" y="163" width="22" height="22" fill="#e2e8f0" rx="4" stroke="none" stroke-width="1"/>
+<text x="280" y="176" font-size="11" fill="#475569" font-weight="400" text-anchor="start" font-family="system-ui,-apple-system,sans-serif">3 / 5 this week</text>
+<rect x="16" y="208" width="868" height="32" fill="#f8fafc" rx="0" stroke="#e2e8f0" stroke-width="1"/>
+<text x="32" y="228" font-size="11" fill="#64748b" font-weight="600" text-anchor="start" font-family="system-ui,-apple-system,sans-serif">Date</text>
+<text x="110" y="228" font-size="11" fill="#64748b" font-weight="600" text-anchor="start" font-family="system-ui,-apple-system,sans-serif">Type</text>
+<text x="220" y="228" font-size="11" fill="#64748b" font-weight="600" text-anchor="start" font-family="system-ui,-apple-system,sans-serif">Company</text>
+<text x="370" y="228" font-size="11" fill="#64748b" font-weight="600" text-anchor="start" font-family="system-ui,-apple-system,sans-serif">Role</text>
+<text x="510" y="228" font-size="11" fill="#64748b" font-weight="600" text-anchor="start" font-family="system-ui,-apple-system,sans-serif">Notes</text>
+<rect x="16" y="240" width="868" height="48" fill="#fff" rx="0" stroke="#e2e8f0" stroke-width="1"/>
+<text x="32" y="268" font-size="12" fill="#475569" font-weight="400" text-anchor="start" font-family="system-ui,-apple-system,sans-serif">Jun 25</text>
+<rect x="110" y="254" width="95.2" height="20" fill="#dbeafe" rx="10" stroke="none"/><text x="157.6" y="268" font-size="11" fill="#1d4ed8" font-weight="600" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif">Application</text>
+<text x="220" y="268" font-size="12" fill="#1e293b" font-weight="500" text-anchor="start" font-family="system-ui,-apple-system,sans-serif">Quanata</text>
+<text x="370" y="268" font-size="12" fill="#64748b" font-weight="400" text-anchor="start" font-family="system-ui,-apple-system,sans-serif">SDET, Backend</text>
+<text x="510" y="268" font-size="11" fill="#64748b" font-weight="400" text-anchor="start" font-family="system-ui,-apple-system,sans-serif">Applied via ZipRecruiter. Top priority.</text>
+<rect x="16" y="288" width="868" height="48" fill="#f9fafb" rx="0" stroke="#e2e8f0" stroke-width="1"/>
+<text x="32" y="316" font-size="12" fill="#475569" font-weight="400" text-anchor="start" font-family="system-ui,-apple-system,sans-serif">Jun 24</text>
+<rect x="110" y="302" width="80.8" height="20" fill="#dcfce7" rx="10" stroke="none"/><text x="150.4" y="316" font-size="11" fill="#15803d" font-weight="600" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif">Interview</text>
+<text x="220" y="316" font-size="12" fill="#1e293b" font-weight="500" text-anchor="start" font-family="system-ui,-apple-system,sans-serif">ITC / client</text>
+<text x="370" y="316" font-size="12" fill="#64748b" font-weight="400" text-anchor="start" font-family="system-ui,-apple-system,sans-serif">Senior SDET</text>
+<text x="510" y="316" font-size="11" fill="#64748b" font-weight="400" text-anchor="start" font-family="system-ui,-apple-system,sans-serif">Phone screen scheduled for Jun 27, 2pm.</text>
+<rect x="16" y="336" width="868" height="48" fill="#fff" rx="0" stroke="#e2e8f0" stroke-width="1"/>
+<text x="32" y="364" font-size="12" fill="#475569" font-weight="400" text-anchor="start" font-family="system-ui,-apple-system,sans-serif">Jun 23</text>
+<rect x="110" y="350" width="95.2" height="20" fill="#dbeafe" rx="10" stroke="none"/><text x="157.6" y="364" font-size="11" fill="#1d4ed8" font-weight="600" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif">Application</text>
+<text x="220" y="364" font-size="12" fill="#1e293b" font-weight="500" text-anchor="start" font-family="system-ui,-apple-system,sans-serif">PactFi</text>
+<text x="370" y="364" font-size="12" fill="#64748b" font-weight="400" text-anchor="start" font-family="system-ui,-apple-system,sans-serif">Senior SDET</text>
+<text x="510" y="364" font-size="11" fill="#64748b" font-weight="400" text-anchor="start" font-family="system-ui,-apple-system,sans-serif">Submitted tailored resume. Awaiting respon…</text>
+<rect x="16" y="384" width="868" height="48" fill="#f9fafb" rx="0" stroke="#e2e8f0" stroke-width="1"/>
+<text x="32" y="412" font-size="12" fill="#475569" font-weight="400" text-anchor="start" font-family="system-ui,-apple-system,sans-serif">Jun 22</text>
+<rect x="110" y="398" width="88.0" height="20" fill="#f3e8ff" rx="10" stroke="none"/><text x="154.0" y="412" font-size="11" fill="#6d28d9" font-weight="600" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif">Networking</text>
+<text x="220" y="412" font-size="12" fill="#1e293b" font-weight="500" text-anchor="start" font-family="system-ui,-apple-system,sans-serif">Forward Financing</text>
+<text x="370" y="412" font-size="12" fill="#64748b" font-weight="400" text-anchor="start" font-family="system-ui,-apple-system,sans-serif">—</text>
+<text x="510" y="412" font-size="11" fill="#64748b" font-weight="400" text-anchor="start" font-family="system-ui,-apple-system,sans-serif">Connected with hiring manager on LinkedIn.</text>
+<rect x="16" y="432" width="868" height="48" fill="#fff" rx="0" stroke="#e2e8f0" stroke-width="1"/>
+<text x="32" y="460" font-size="12" fill="#475569" font-weight="400" text-anchor="start" font-family="system-ui,-apple-system,sans-serif">Jun 21</text>
+<rect x="110" y="446" width="95.2" height="20" fill="#dbeafe" rx="10" stroke="none"/><text x="157.6" y="460" font-size="11" fill="#1d4ed8" font-weight="600" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif">Application</text>
+<text x="220" y="460" font-size="12" fill="#1e293b" font-weight="500" text-anchor="start" font-family="system-ui,-apple-system,sans-serif">Volt Labs</text>
+<text x="370" y="460" font-size="12" fill="#64748b" font-weight="400" text-anchor="start" font-family="system-ui,-apple-system,sans-serif">Senior QA Engineer</text>
+<text x="510" y="460" font-size="11" fill="#64748b" font-weight="400" text-anchor="start" font-family="system-ui,-apple-system,sans-serif">Applied via company site. No response yet.</text>
+</svg>

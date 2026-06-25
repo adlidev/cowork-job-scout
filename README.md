@@ -1,8 +1,22 @@
-# Job Match Dashboard
+# cowork-job-scout
 
 A self-updating job search dashboard that runs inside [Claude for Desktop](https://claude.ai/download) (Cowork mode). It searches Dice, Indeed, and ZipRecruiter daily for roles matching your profile, scores them with AI, and tracks your applications and job search activity — all in one place.
 
-![Dashboard screenshot](docs/screenshot.png)
+---
+
+## Screenshots
+
+### Job Matches
+![Matches tab](docs/screenshot-matches.svg)
+
+### Job Search Log
+![Job Search Log](docs/screenshot-log.svg)
+
+### Resume Library
+![Resumes tab](docs/screenshot-resumes.svg)
+
+### Settings
+![Settings tab](docs/screenshot-settings.svg)
 
 ---
 
@@ -12,7 +26,8 @@ A self-updating job search dashboard that runs inside [Claude for Desktop](https
 - **AI-scored matches** — each job gets a 1–10 relevance score with a plain-English reason
 - **Smart filtering** — exclude defense roles, filter by salary, work arrangement, and local metro area
 - **Job search log** — track applications, interviews, networking contacts, and follow-ups
-- **Resume library** — keep your active and archived resumes in one tab
+- **Resume library** — keep your active and archived resumes in one tab, with tailored versions per company
+- **AI resume tailoring** — ask Claude to tailor your base resume for any job directly from the dashboard
 - **Live Search** — bypass the daily cache and run a fresh search on demand
 - **Fully configurable** — all preferences managed in a Settings tab, no code editing required
 
@@ -161,6 +176,37 @@ The `keywordScore()` function in the script provides keyword-based fallback scor
 ### Defense/Clearance Roles
 
 Set to **Penalize (−2)**, **Exclude**, or **Include normally** in Settings. The dashboard uses keyword matching on the job title, company name, and description to identify defense-adjacent roles.
+
+---
+
+## Resume Tailoring
+
+The dashboard includes a one-click resume tailoring workflow. For each job in your Matches tab, click **Tailor** to open the tailor modal. The dashboard builds a complete prompt and automatically copies it to your clipboard.
+
+### Workflow
+
+1. **Set up a base resume** in your jobsearch folder — a comprehensive `.docx` file that serves as your master template (not already tailored for a specific company). The recommended filename is `YourName_resume_Master.docx`. See Folder Structure below.
+2. **Find a job** in the Matches tab and click the **Tailor** button next to it.
+3. **The modal opens with the prompt already copied to your clipboard.** Switch to the Claude chat window and paste it in.
+4. **Claude fetches the job listing** (if a URL is available), reads your base resume, and creates a tailored version — adjusting the summary, reordering bullets, and surfacing the most relevant experience. It does not fabricate anything.
+5. **Claude saves the result** as both `.docx` and `.pdf` in `resumes/archived/`, named by company (e.g. `YourName_resume_Acme.docx / .pdf`).
+6. **Claude registers it in the Resumes tab** of the dashboard automatically.
+
+> **Note:** The Tailor button generates a prompt and copies it to your clipboard. Due to how Cowork artifacts are sandboxed, it cannot send the prompt directly — you need to paste it into the chat yourself. This is a one-step paste, not a multi-step copy/paste process.
+
+### If No Base Resume Is Found
+
+If Claude can't find a base resume in your jobsearch folder, it will stop and tell you exactly what it looked for. Common reasons:
+
+- The file doesn't exist yet — create a `.docx` with your full work history and save it to your jobsearch folder
+- The filename doesn't make it obvious it's a base/master resume — rename it to something like `YourName_resume_Master.docx`
+- Claude doesn't have folder access — make sure your jobsearch folder is selected in Cowork mode (the folder shown in the top bar of the Claude desktop app)
+
+### Tips for Better Tailoring
+
+- Keep a **base resume** that's comprehensive rather than trimmed — Claude pulls from it selectively per role, so more content gives it more to work with
+- Include a **skills profile** document (a plain-text file listing all your tools, domains, and years of experience) that Claude can reference without re-reading your full work history every time
+- Always **review the output** before sending — Claude won't invent experience, but it may emphasize things differently than you would
 
 ---
 
