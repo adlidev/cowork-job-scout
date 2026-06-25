@@ -1,0 +1,31 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Personal/runtime files — never commit these
+.rapidapi_key
+*.key
+*.env
+
+# Dashboard runtime files (personal data, preloaded results)
+dashboard_temp.html
+jobs_payload.json
+patch_all.py
+patch_settings.py
+dashboard_orig.html
+
+# Resume files (personal)
+resumes/
+*.docx
+*.pdf
+
+# Skills profile (personal)
+skills_profile.md
+
+# Scheduled task output
+*.jsonl
+
+# Python
+__pycache__/
+*.pyc
