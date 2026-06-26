@@ -212,7 +212,31 @@ The profile in **Settings → Your Profile** is a free-text description sent to 
 
 ### Scoring Adjustments
 
-The `keywordScore()` function in the script provides keyword-based fallback scoring when AI scoring fails or times out. You can edit this function to add or adjust scoring rules for your specific role. Look for it in the `<script>` section.
+Scoring is fully configurable — no need to edit code.
+
+**Score Penalty Keywords (Settings → Scoring)**
+
+If a job mentions technologies or industries you'd rather deprioritize, add them here as a comma-separated list (e.g. `java, selenium, playwright, c#`). Any job whose title, company name, or summary contains one of these terms will have its keyword score reduced by 1 (floor: 1). Word boundaries are respected, so `java` won't penalise jobs that only mention `javascript`.
+
+This setting is blank by default so the dashboard works neutrally out of the box for anyone using it. Only add terms that reflect *your* stack and preferences.
+
+**How `skills_profile.md` feeds into scoring**
+
+The `skills_profile.md` file in your jobsearch folder is not read automatically during job scoring — it's designed for resume tailoring. However, you can use it to decide what penalty terms to add:
+
+1. Review your `skills_profile.md` to identify technologies you have little or no experience with, or industries you want to avoid.
+2. Add those as comma-separated terms in **Settings → Scoring → Score Penalty Keywords**.
+3. Jobs requiring those stacks will score slightly lower, surfacing better-matched roles at the top.
+
+This keeps the penalty logic in Settings (easy to change, personal to you) rather than hardcoded in the dashboard file.
+
+**AI scoring prompt**
+
+The full AI score is determined by Claude Haiku using the profile text in **Settings → Your Profile**. The more specific you are — core skills, seniority, what you're looking for — the better the AI scores will be. The penalty terms you set are also included in this prompt automatically.
+
+**Keyword fallback**
+
+The `keywordScore()` function in the script provides fast keyword-based scores used while AI scoring is running, and as a fallback when it fails or times out. Its built-in rules reward seniority titles, QA/automation role signals, remote positions, and Python/pytest; they penalise defense/clearance and junior-level signals. You generally don't need to modify it — use the Settings penalty terms instead.
 
 ### Defense/Clearance Roles
 

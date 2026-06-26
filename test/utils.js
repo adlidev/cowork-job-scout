@@ -132,16 +132,22 @@ function isHybridOutsideLocalArea(job, localAreaRe) {
   return true;
 }
 
-function keywordScore(job) {
-  const t = ((job.title || '') + (job.summary || '') + (job.companyName || '')).toLowerCase();
+function keywordScore(job, penaltyTerms) {
+  const terms = penaltyTerms || [];
+  const t = [job.title, job.summary, job.companyName].filter(Boolean).join(' ').toLowerCase();
   let s = 4;
   if (/senior|staff|lead|principal/.test(t)) s++;
   if (/quality engineer|qa engineer|\bqe\b|sdet|test engineer|software developer in test/.test(t)) s += 2;
   if (/automation|pytest|python|api test/.test(t)) s++;
   if (/remote/.test(t) || job.isRemote) s++;
   if (/clearance|secret|top secret|dod|military|defense|homeland/.test(t)) s = Math.max(1, s - 2);
-  if (/manufacturing|medical device|iso 9001|fda/.test(t)) s = Math.min(s, 3);
   if (/junior|associate|entry.level/.test(t)) s = Math.max(1, s - 2);
+  if (terms.length) {
+    const penaltyRe = new RegExp(
+      terms.map(term => (/^\w/.test(term) ? '\\b' : '') + term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + (/\w$/.test(term) ? '\\b' : '')).join('|')
+    );
+    if (penaltyRe.test(t)) s = Math.max(1, s - 1);
+  }
   return Math.min(10, s);
 }
 

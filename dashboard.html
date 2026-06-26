@@ -659,6 +659,14 @@ const PRELOADED_TIMESTAMP = null; // Set by daily task injection
       </div>
     </div>
     <div class="settings-section">
+      <h3>Scoring</h3>
+      <div class="settings-field">
+        <label>Score Penalty Keywords <span style="font-weight:400;color:#94a3b8">— jobs mentioning these get a &minus;1 score</span></label>
+        <div style="font-size:11px;color:#64748b;margin-bottom:6px;">Comma-separated terms. Use for technologies or industries you&#x2019;d rather deprioritize. Leave blank for no penalty. Example: <code style="background:#f1f5f9;padding:1px 4px;border-radius:3px;">java, selenium, playwright, appium</code></div>
+        <input id="st-penalty-terms" class="form-input" placeholder="e.g. java, selenium, playwright, appium, c#" style="width:100%;box-sizing:border-box;" />
+      </div>
+    </div>
+    <div class="settings-section">
       <h3>Search Terms</h3>
       <div style="font-size:12px;color:#64748b;margin-bottom:10px;">Job titles and keywords to search across all job boards (one per line). The dashboard handles service-specific formatting automatically.</div>
       <div class="settings-field">
@@ -747,6 +755,7 @@ const DEFAULT_SETTINGS = {
   workArrangements: ['remote'], commuteRangeMiles: 0, minSalary: 0, hideNoSalary: false, defensePreference: 'penalize',
   weeklyActivityGoal: 5,
   autoBackupIntervalHours: 0,
+  scorePenaltyTerms: [],
   searchTerms: null,
   diceSearchTerms: null, indeedSearchTerms: null, zrSearchTerms: null, localMetroCities: null,
 };
@@ -1095,13 +1104,15 @@ function toggleActForm() {
   btn.classList.toggle('open', open);
   if (open) {
     if (!ACT_EDITING_ID) {
-      document.getElementById('ac-date').value     = new Date().toISOString().slice(0,10);
-      document.getElementById('ac-type').value     = 'Job Application';
-      document.getElementById('ac-employer').value = '';
-      document.getElementById('ac-contact').value  = '';
-      document.getElementById('ac-role').value     = '';
-      document.getElementById('ac-url').value      = '';
-      document.getElementById('ac-notes').value    = '';
+      document.getElementById('ac-date').value          = new Date().toISOString().slice(0,10);
+      document.getElementById('ac-type').value          = 'Job Application';
+      document.getElementById('ac-employer').value      = '';
+      document.getElementById('ac-contact').value       = '';
+      document.getElementById('ac-role').value          = '';
+      document.getElementById('ac-url').value           = '';
+      document.getElementById('ac-notes').value         = '';
+      document.getElementById('ac-appstatus').value     = 'applied';
+      document.getElementById('ac-appstatusnote').value = '';
       updateActFormFields();
     }
   } else {
@@ -1156,17 +1167,22 @@ function submitActivity() {
   const type = document.getElementById('ac-type').value;
   const date = document.getElementById('ac-date').value;
   if (!date) { alert('Date is required.'); return; }
+  const employer = document.getElementById('ac-employer').value.trim();
+  const contact  = document.getElementById('ac-contact').value.trim();
+  const role     = document.getElementById('ac-role').value.trim();
+  const url      = document.getElementById('ac-url').value.trim();
+  const notes    = document.getElementById('ac-notes').value.trim();
+  // Require at least one substantive field to prevent blank entries
+  if (!employer && !contact && !role && !url && !notes) {
+    alert('Please fill in at least one field (employer, role, notes, etc.) before saving.');
+    return;
+  }
   const acts = getActs();
   const entry = {
-    type, date,
-    employer:       document.getElementById('ac-employer').value.trim(),
-    contact:        document.getElementById('ac-contact').value.trim(),
-    method:         document.getElementById('ac-method').value,
-    role:           document.getElementById('ac-role').value.trim(),
-    url:            document.getElementById('ac-url').value.trim(),
-    notes:          document.getElementById('ac-notes').value.trim(),
-    appStatus:      type === 'Job Application' ? document.getElementById('ac-appstatus').value     : undefined,
-    appStatusNote:  type === 'Job Application' ? document.getElementById('ac-appstatusnote').value.trim() : undefined,
+    type, date, employer, contact, role, url, notes,
+    method:        document.getElementById('ac-method').value,
+    appStatus:     type === 'Job Application' ? document.getElementById('ac-appstatus').value           : undefined,
+    appStatusNote: type === 'Job Application' ? document.getElementById('ac-appstatusnote').value.trim() : undefined,
   };
   if (ACT_EDITING_ID) {
     acts[ACT_EDITING_ID] = { ...acts[ACT_EDITING_ID], ...entry, updatedAt: Date.now() };
@@ -1180,9 +1196,10 @@ function submitActivity() {
     const id = 'act_' + Date.now() + '_' + Math.random().toString(36).slice(2,5);
     acts[id] = { id, ...entry, createdAt: Date.now() };
     setActs(acts);
-    ['ac-employer','ac-contact','ac-role','ac-url','ac-notes'].forEach(fid => {
+    ['ac-employer','ac-contact','ac-role','ac-url','ac-notes','ac-appstatusnote'].forEach(fid => {
       document.getElementById(fid).value = '';
     });
+    document.getElementById('ac-appstatus').value = 'applied';
   }
   renderActivities();
   refreshActBadge();
@@ -1560,7 +1577,8 @@ function isHybridOutsideLocalArea(job) {
 }
 
 // ─── AI scoring ───────────────────────────────────────────────────────────────
-function keywordScore(job) {
+function keywordScore(job, penaltyTerms) {
+  const terms = penaltyTerms || [];
   const t = [job.title,job.summary,job.companyName].filter(Boolean).join(' ').toLowerCase();
   let s = 4;
   if (/senior|staff|lead|principal/.test(t)) s++;
@@ -1568,8 +1586,13 @@ function keywordScore(job) {
   if (/automation|pytest|python|api test/.test(t)) s++;
   if (/remote/.test(t) || job.isRemote) s++;
   if (/clearance|secret|top secret|dod|military|defense|homeland/.test(t)) s = Math.max(1, s-2);
-  if (/manufacturing|medical device|iso 9001|fda/.test(t)) s = Math.min(s, 3);
   if (/junior|associate|entry.level/.test(t)) s = Math.max(1, s-2);
+  if (terms.length) {
+    const penaltyRe = new RegExp(
+      terms.map(term => (/^\w/.test(term) ? '\\b' : '') + term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + (/\w$/.test(term) ? '\\b' : '')).join('|')
+    );
+    if (penaltyRe.test(t)) s = Math.max(1, s-1);
+  }
   return Math.min(10, s);
 }
 
@@ -1578,13 +1601,21 @@ async function scoreJobs(jobs) {
   const list = jobs.map((j,i) =>
     `[${i+1}] "${j.title}" at ${j.companyName} | ${(j.workplaceTypes||[]).join('/')||'unknown'} | Salary: ${j.salary||'not listed'} | Source: ${j.source}\nSummary: ${(j.summary||'').slice(0,200)}`
   ).join('\n\n');
+  const cfg = getSettings();
+  const metro = cfg.localMetroCities && cfg.localMetroCities.length
+    ? cfg.localMetroCities.slice(0,4).join(', ')
+    : (cfg.location ? cfg.location : 'the candidate\'s local area');
+  const penaltyTerms = cfg.scorePenaltyTerms || [];
+  const penaltyLine = penaltyTerms.length
+    ? `\n- Job primarily requires ${penaltyTerms.join(', ')} (not in candidate's stack) = subtract 1`
+    : '';
   const prompt = `Score these ${jobs.length} job listings for this candidate:
 ${PROFILE}${getDismissalContext()}
 
 SCORING: 9-10=Senior QE/SDET/test-automation, remote/hybrid, matching stack. 7-8=good fit. 5-6=partial. 1-4=poor.
 ADJUSTMENTS:
 - Security clearance OR defense/military/homeland = subtract 2 (min 1)
-- Hybrid role outside Boulder/Denver CO metro = score 0 (auto-exclude)
+- Hybrid role outside ${metro} = score 0 (auto-exclude)${penaltyLine}
 
 JOBS:
 ${list}
@@ -1861,7 +1892,7 @@ async function run(forceSearch = false) {
       scored = toScore
         .map((j,i) => ({
           ...j,
-          matchScore:  scoreMap[i]?.score  ?? keywordScore(j),
+          matchScore:  scoreMap[i]?.score  ?? keywordScore(j, getSettings().scorePenaltyTerms || []),
           matchReason: scoreMap[i]?.reason ?? (scoringFailed ? 'keyword match' : ''),
         }))
         .filter(j => {
@@ -2084,6 +2115,7 @@ function loadSettingsForm() {
   document.querySelectorAll('input[name="st-defense"]').forEach(r => r.checked = r.value === (s.defensePreference || 'penalize'));
   document.getElementById('st-week-goal').value = s.weeklyActivityGoal || 5;
   document.getElementById('st-auto-backup').value = s.autoBackupIntervalHours || 0;
+  document.getElementById('st-penalty-terms').value = (s.scorePenaltyTerms || []).join(', ');
   // Common search terms — derive default from DICE_SEARCHES by stripping " remote" suffix
   const defaultTerms = [...new Set(DICE_SEARCHES.map(t=>t.replace(/ remote$/i,'').trim()))].join('\n');
   document.getElementById('st-terms').value  = s.searchTerms        ? s.searchTerms.join('\n')                    : defaultTerms;
@@ -2119,6 +2151,8 @@ function saveSettingsForm() {
     indeedSearchTerms: indeedLines.length ? indeedLines : null,
     zrSearchTerms:     zrLines.length     ? zrLines     : null,
     localMetroCities:  metro.length       ? metro       : null,
+    scorePenaltyTerms: document.getElementById('st-penalty-terms').value
+      .split(',').map(t => t.trim().toLowerCase()).filter(Boolean),
   });
   const msg = document.getElementById('settings-saved-msg');
   msg.style.display = 'inline';

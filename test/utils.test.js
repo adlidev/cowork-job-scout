@@ -329,11 +329,6 @@ describe('keywordScore', () => {
     assert.ok(keywordScore(junior) < keywordScore(senior));
   });
 
-  it('manufacturing/medical device role is capped at 3', () => {
-    const job = { title: 'Senior QA Engineer', summary: 'Medical device ISO 9001 FDA experience', companyName: 'MedCo', isRemote: true };
-    assert.ok(keywordScore(job) <= 3);
-  });
-
   it('score never exceeds 10', () => {
     const job = { title: 'Senior Staff QA Engineer SDET pytest automation Python remote', summary: 'api test automation python pytest', companyName: 'Acme', isRemote: true };
     assert.ok(keywordScore(job) <= 10);
@@ -347,6 +342,31 @@ describe('keywordScore', () => {
   it('non-QA role without bonuses scores at most 6', () => {
     const job = { title: 'Software Engineer', summary: '', companyName: 'Acme', isRemote: false };
     assert.ok(keywordScore(job) <= 6);
+  });
+
+  it('penalty terms param: penalised job scores lower than same job without terms', () => {
+    const job = { title: 'Senior SDET', summary: 'playwright selenium automation required', companyName: 'Acme', isRemote: true };
+    assert.ok(keywordScore(job, ['playwright', 'selenium']) < keywordScore(job, []));
+  });
+
+  it('penalty terms param: java term matches "java" but not "javascript"', () => {
+    const javaJob   = { title: 'Senior QA', summary: 'java selenium backend', companyName: 'Acme', isRemote: true };
+    const jsJob     = { title: 'Senior QA', summary: 'javascript frontend automation', companyName: 'Acme', isRemote: true };
+    const withPenalty   = keywordScore(javaJob, ['java']);
+    const withoutPenalty = keywordScore(javaJob, []);
+    assert.ok(withPenalty < withoutPenalty, 'java term should penalise the java job');
+    // "javascript" contains "java" as substring but \b prevents match
+    assert.equal(keywordScore(jsJob, ['java']), keywordScore(jsJob, []), 'java term should not penalise javascript job');
+  });
+
+  it('penalty terms: score stays >= 1 with multiple stacked penalties', () => {
+    const job = { title: 'Junior QA', summary: 'java selenium appium playwright clearance', companyName: 'X', isRemote: false };
+    assert.ok(keywordScore(job, ['java', 'selenium', 'appium', 'playwright']) >= 1);
+  });
+
+  it('no penalty terms passed: no penalty applied (default behaviour for fresh installs)', () => {
+    const job = { title: 'Senior QA', summary: 'playwright selenium java automation', companyName: 'Acme', isRemote: true };
+    assert.equal(keywordScore(job), keywordScore(job, []));
   });
 });
 
