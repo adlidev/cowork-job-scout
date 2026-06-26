@@ -4,6 +4,19 @@ A self-updating job search dashboard that runs inside [Claude for Desktop](https
 
 ---
 
+## What It Does
+
+- **Daily automated search** across Dice, Indeed, and ZipRecruiter (via scheduled Claude task)
+- **AI-scored matches** — each job gets a 1–10 relevance score with a plain-English reason
+- **Smart filtering** — exclude defense roles, filter by salary, work arrangement, and local metro area
+- **Job search log** — track applications, interviews, networking contacts, and follow-ups
+- **Resume library** — keep your active and archived resumes in one tab, with tailored versions per company
+- **AI resume tailoring** — ask Claude to tailor your base resume for any job directly from the dashboard
+- **Live Search** — bypass the daily cache and run a fresh search on demand
+- **Fully configurable** — all preferences managed in a Settings tab, no code editing required
+
+---
+
 ## Screenshots
 
 ### Job Matches
@@ -17,19 +30,6 @@ A self-updating job search dashboard that runs inside [Claude for Desktop](https
 
 ### Settings
 ![Settings tab](docs/screenshot-settings.png)
-
----
-
-## What It Does
-
-- **Daily automated search** across Dice, Indeed, and ZipRecruiter (via scheduled Claude task)
-- **AI-scored matches** — each job gets a 1–10 relevance score with a plain-English reason
-- **Smart filtering** — exclude defense roles, filter by salary, work arrangement, and local metro area
-- **Job search log** — track applications, interviews, networking contacts, and follow-ups
-- **Resume library** — keep your active and archived resumes in one tab, with tailored versions per company
-- **AI resume tailoring** — ask Claude to tailor your base resume for any job directly from the dashboard
-- **Live Search** — bypass the daily cache and run a fresh search on demand
-- **Fully configurable** — all preferences managed in a Settings tab, no code editing required
 
 ---
 
