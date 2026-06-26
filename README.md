@@ -92,7 +92,7 @@ Click the **⚙ Settings** tab inside the dashboard and fill in:
 | Section | What to fill in |
 |---|---|
 | **Your Profile** | Your name, location, and a description of your skills and experience (this is sent to Claude when scoring jobs) |
-| **Job Preferences** | Work arrangement (remote/hybrid/on-site), commute range, minimum salary, defense role preference |
+| **Job Preferences** | Work arrangement (remote/hybrid/on-site), commute range, minimum salary, defense role preference, and weekly activity goal |
 | **Local Metro Cities** | Cities within commute range — use the **Auto-fill** button if you've set your location and commute range |
 | **Search Terms** | Job titles to search for across all three boards (e.g. `senior software engineer`, `staff engineer`) |
 
@@ -162,6 +162,10 @@ Everything else. Use **＋ Log a job search activity** to add any of the followi
 | **Other** | Anything that doesn't fit the above |
 
 For Job Application entries, you can also track application status (Applied → Phone Screen → Interviewing → Offer / Rejected / Withdrawn / No Response) and update it as the process moves forward.
+
+**Weekly activity goal**
+
+The Log tab shows a progress bar tracking how many activities you've logged in the current week against your weekly goal. The default is **5 per week**, which matches Colorado's unemployment insurance requirement. If you're in a different state, update this in **Settings → Job Preferences → Weekly Activity Goal** to match your state's requirement. Keep records of all logged activities for at least 2 years in case of a UI audit.
 
 ---
 
