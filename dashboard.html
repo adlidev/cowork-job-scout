@@ -381,7 +381,7 @@ const PRELOADED_TIMESTAMP = null; // Set by daily task injection
     <div class="modal-sub">Copy this prompt and paste it into your Claude chat:</div>
     <textarea class="modal-prompt" id="modal-prompt" readonly></textarea>
     <div class="modal-actions">
-      <span class="modal-hint">Paste into chat → Claude will tailor &amp; save the files</span>
+      <span class="modal-hint">Paste into chat → Claude will tailor &amp; save the files<br><span style="font-size:11px;color:#94a3b8;">Tip: add a <code>skills_profile.md</code> to your jobsearch folder to give Claude standing rules for resume tailoring.</span></span>
       <button class="btn-modal-close" onclick="closeModal()">Close</button>
       <button class="btn-copy" id="btn-copy" onclick="copyPrompt()">Copy prompt</button>
     </div>
@@ -678,6 +678,29 @@ const PRELOADED_TIMESTAMP = null; // Set by daily task injection
       </details>
     </div>
     <div class="settings-section" style="background:#f8fafc;">
+      <h3>Data Backup</h3>
+      <div style="font-size:13px;color:#64748b;margin-bottom:12px;">
+        All dashboard data is stored in browser storage. Export a backup regularly so you don&#x2019;t lose your activity log, settings, or resume library if storage is cleared.
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px;">
+        <button onclick="exportData()" style="font-size:13px;padding:7px 16px;background:#1A3A5C;border:none;border-radius:6px;color:white;cursor:pointer;">&#x2193; Export Backup</button>
+        <label style="font-size:13px;padding:7px 16px;background:white;border:1px solid #94a3b8;border-radius:6px;color:#475569;cursor:pointer;">
+          &#x2191; Import Backup<input type="file" accept=".json" onchange="importData(this)" style="display:none;">
+        </label>
+        <span id="backup-msg" style="display:none;color:#16a34a;font-size:13px;font-weight:600;"></span>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+        <label style="font-size:13px;color:#374151;font-weight:600;">Auto-backup:</label>
+        <select id="st-auto-backup" style="font-size:13px;padding:5px 10px;border:1px solid #d1d5db;border-radius:6px;color:#374151;">
+          <option value="0">Off</option>
+          <option value="1">Every hour</option>
+          <option value="4">Every 4 hours</option>
+          <option value="24">Daily</option>
+        </select>
+        <span style="font-size:11px;color:#94a3b8;">Saves to your Downloads folder while the dashboard is open.</span>
+      </div>
+    </div>
+    <div class="settings-section" style="background:#f8fafc;">
       <h3>Reset</h3>
       <div style="font-size:13px;color:#64748b;margin-bottom:10px;">Clear all settings and revert to built-in defaults.</div>
       <div id="reset-confirm-wrap" style="display:flex;align-items:center;gap:10px;">
@@ -723,6 +746,7 @@ const DEFAULT_SETTINGS = {
   candidateName: '', location: '', profile: '',
   workArrangements: ['remote'], commuteRangeMiles: 0, minSalary: 0, hideNoSalary: false, defensePreference: 'penalize',
   weeklyActivityGoal: 5,
+  autoBackupIntervalHours: 0,
   searchTerms: null,
   diceSearchTerms: null, indeedSearchTerms: null, zrSearchTerms: null, localMetroCities: null,
 };
@@ -1995,6 +2019,58 @@ async function autoFillMetroCities() {
 }
 
 // ─── Settings form ──────────────────────────────────────────────────────────
+// ─── Backup key list ──────────────────────────────────────────────────────────
+const BACKUP_KEYS = ['jd_settings','jd_activities','jd_dismissed','jd_resumes','jd_job_cache'];
+
+let _autoBackupTimer = null;
+
+function exportData(silent = false) {
+  const payload = { exportedAt: new Date().toISOString(), version: '1', data: {} };
+  for (const key of BACKUP_KEYS) {
+    const val = localStorage.getItem(key);
+    if (val) payload.data[key] = val;
+  }
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const url  = URL.createObjectURL(blob);
+  const date = new Date().toISOString().slice(0, 10);
+  const a    = document.createElement('a');
+  a.href = url; a.download = `job-scout-backup-${date}.json`; a.click();
+  URL.revokeObjectURL(url);
+  if (!silent) {
+    const msg = document.getElementById('backup-msg');
+    if (msg) { msg.textContent = '✓ Backup downloaded'; msg.style.display = 'inline'; setTimeout(() => msg.style.display = 'none', 3000); }
+  }
+}
+
+function importData(input) {
+  const file = input.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const payload = JSON.parse(e.target.result);
+      if (!payload.data) throw new Error('Invalid backup file');
+      for (const [key, val] of Object.entries(payload.data)) {
+        if (BACKUP_KEYS.includes(key)) localStorage.setItem(key, val);
+      }
+      const msg = document.getElementById('backup-msg');
+      if (msg) { msg.textContent = '✓ Backup restored — reloading…'; msg.style.display = 'inline'; }
+      setTimeout(() => location.reload(), 1200);
+    } catch(err) {
+      alert('Could not read backup file: ' + err.message);
+    }
+  };
+  reader.readAsText(file);
+  input.value = '';
+}
+
+function initAutoBackup() {
+  if (_autoBackupTimer) { clearInterval(_autoBackupTimer); _autoBackupTimer = null; }
+  const hours = getSettings().autoBackupIntervalHours || 0;
+  if (hours > 0) {
+    _autoBackupTimer = setInterval(() => exportData(true), hours * 60 * 60 * 1000);
+  }
+}
+
 function loadSettingsForm() {
   const s = getSettings();
   document.getElementById('st-name').value      = s.candidateName || '';
@@ -2007,6 +2083,7 @@ function loadSettingsForm() {
   document.getElementById('st-commute').value = s.commuteRangeMiles > 0 ? s.commuteRangeMiles : '';
   document.querySelectorAll('input[name="st-defense"]').forEach(r => r.checked = r.value === (s.defensePreference || 'penalize'));
   document.getElementById('st-week-goal').value = s.weeklyActivityGoal || 5;
+  document.getElementById('st-auto-backup').value = s.autoBackupIntervalHours || 0;
   // Common search terms — derive default from DICE_SEARCHES by stripping " remote" suffix
   const defaultTerms = [...new Set(DICE_SEARCHES.map(t=>t.replace(/ remote$/i,'').trim()))].join('\n');
   document.getElementById('st-terms').value  = s.searchTerms        ? s.searchTerms.join('\n')                    : defaultTerms;
@@ -2036,6 +2113,7 @@ function saveSettingsForm() {
     hideNoSalary:      document.getElementById('st-hide-no-salary').checked,
     defensePreference: defenseVal,
     weeklyActivityGoal: parseInt(document.getElementById('st-week-goal').value) || 5,
+    autoBackupIntervalHours: parseInt(document.getElementById('st-auto-backup').value) || 0,
     searchTerms:       commonTerms.length  ? commonTerms : null,
     diceSearchTerms:   diceLines.length   ? diceLines   : null,
     indeedSearchTerms: indeedLines.length ? indeedLines : null,
@@ -2045,6 +2123,7 @@ function saveSettingsForm() {
   const msg = document.getElementById('settings-saved-msg');
   msg.style.display = 'inline';
   setTimeout(() => msg.style.display = 'none', 2500);
+  initAutoBackup();
 }
 function showResetConfirm() {
   document.getElementById('btn-reset-init').style.display = 'none';
@@ -2068,6 +2147,7 @@ function resetSettings() {
 // fully defined before run() → initResumes() tries to reference it.
 updateActFormFields();
 run();
+initAutoBackup();
 </script>
 </body>
 </html>
