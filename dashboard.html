@@ -546,7 +546,7 @@ const PRELOADED_TIMESTAMP = null; // Set by daily task injection
     </table>
   </div>
   <div style="font-size:11px;color:#bbb;margin-top:8px;padding:0 2px;">
-    Colorado unemployment requires 5 job search activities per week. Keep records for 2 years in case of audit.
+    <span id="act-footer-note">Keep records of all job search activities for at least 2 years in case of audit.</span>
   </div>
 </div>
 
@@ -643,6 +643,10 @@ const PRELOADED_TIMESTAMP = null; // Set by daily task injection
             <label><input type="radio" name="st-defense" value="include"> Include normally</label>
           </div>
         </div>
+        <div class="settings-field"><label>Weekly Activity Goal <span style="font-weight:400;color:#94a3b8">— for unemployment tracking</span></label>
+          <input id="st-week-goal" type="number" min="1" step="1" style="width:80px;" placeholder="5" />
+          <div style="font-size:11px;color:#64748b;margin-top:4px;">Number of job search activities required per week by your state&#x2019;s unemployment office. Colorado default is 5. Check your state&#x2019;s requirements if different.</div>
+        </div>
       </div>
       <div style="margin-top:16px;padding-top:16px;border-top:1px solid #e2e8f0;">
         <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:4px;">Local Metro Cities <span style="font-weight:400;color:#94a3b8">— hybrid &amp; on-site roles outside this list are excluded</span></label>
@@ -712,12 +716,13 @@ const DISMISSED_KEY = 'jd_dismissed';
 const ACT_KEY       = 'jd_activities';
 const RESUME_KEY    = 'jd_resumes';
 const SETTINGS_KEY  = 'jd_settings';
-const ACT_WEEK_REQ  = 5;
+// ACT_WEEK_REQ is read from settings (weeklyActivityGoal, default 5) — see refreshActBadge / renderActivities
 
 // ─── Settings ────────────────────────────────────────────────────────────────
 const DEFAULT_SETTINGS = {
   candidateName: '', location: '', profile: '',
   workArrangements: ['remote'], commuteRangeMiles: 0, minSalary: 0, hideNoSalary: false, defensePreference: 'penalize',
+  weeklyActivityGoal: 5,
   searchTerms: null,
   diceSearchTerms: null, indeedSearchTerms: null, zrSearchTerms: null, localMetroCities: null,
 };
@@ -1166,6 +1171,7 @@ function removeActivity(id) {
 }
 
 function refreshActBadge() {
+  const ACT_WEEK_REQ = getSettings().weeklyActivityGoal || 5;
   const { start, end } = getWeekBounds(0);
   const n = Object.values(getActs()).filter(a => {
     const d = new Date(a.date + 'T12:00:00');
@@ -1176,6 +1182,7 @@ function refreshActBadge() {
 }
 
 function renderActivities() {
+  const ACT_WEEK_REQ = getSettings().weeklyActivityGoal || 5;
   refreshActBadge();
   const { start, end } = getWeekBounds(actWeekOffset);
   const all = getActs();
@@ -1199,13 +1206,15 @@ function renderActivities() {
   document.getElementById('act-progress-label').textContent = met
     ? '✓ Weekly requirement met'
     : `${ACT_WEEK_REQ - count} more needed this week`;
+  const footerNote = document.getElementById('act-footer-note');
+  if (footerNote) footerNote.textContent = `Weekly goal: ${ACT_WEEK_REQ} activities — keep records for at least 2 years in case of audit.`;
   const tbody = document.getElementById('act-rows');
   if (!ids.length) {
     tbody.innerHTML = `<tr><td colspan="8"><div class="act-empty">
       No activities logged yet.<br>
       Hit <strong>Mark Applied</strong> on any job in the Matches tab — it logs here automatically.<br>
       Or use <strong>+ Log a job search activity</strong> above to add any activity manually.<br>
-      <span style="font-size:11px;color:#bbb;">Colorado requires 5 per week — keep records for 2 years.</span>
+      <span style="font-size:11px;color:#bbb;">Your weekly goal is ${ACT_WEEK_REQ} — keep records for at least 2 years.</span>
     </div></td></tr>`;
     return;
   }
@@ -1997,6 +2006,7 @@ function loadSettingsForm() {
   document.querySelectorAll('input[name="st-arrange"]').forEach(cb => cb.checked = arr.includes(cb.value));
   document.getElementById('st-commute').value = s.commuteRangeMiles > 0 ? s.commuteRangeMiles : '';
   document.querySelectorAll('input[name="st-defense"]').forEach(r => r.checked = r.value === (s.defensePreference || 'penalize'));
+  document.getElementById('st-week-goal').value = s.weeklyActivityGoal || 5;
   // Common search terms — derive default from DICE_SEARCHES by stripping " remote" suffix
   const defaultTerms = [...new Set(DICE_SEARCHES.map(t=>t.replace(/ remote$/i,'').trim()))].join('\n');
   document.getElementById('st-terms').value  = s.searchTerms        ? s.searchTerms.join('\n')                    : defaultTerms;
@@ -2025,6 +2035,7 @@ function saveSettingsForm() {
     minSalary:         minSal,
     hideNoSalary:      document.getElementById('st-hide-no-salary').checked,
     defensePreference: defenseVal,
+    weeklyActivityGoal: parseInt(document.getElementById('st-week-goal').value) || 5,
     searchTerms:       commonTerms.length  ? commonTerms : null,
     diceSearchTerms:   diceLines.length   ? diceLines   : null,
     indeedSearchTerms: indeedLines.length ? indeedLines : null,
