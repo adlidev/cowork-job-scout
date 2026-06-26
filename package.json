@@ -1,0 +1,8 @@
+{
+  "name": "cowork-job-scout",
+  "version": "1.0.0",
+  "description": "Job search dashboard for Claude Cowork mode",
+  "scripts": {
+    "test": "node --test test/utils.test.js"
+  }
+}
