@@ -181,7 +181,7 @@ Set to **Penalize (−2)**, **Exclude**, or **Include normally** in Settings. Th
 
 ## Resume Tailoring
 
-The dashboard includes a one-click resume tailoring workflow. For each job in your Matches tab, click **Tailor** to open the tailor modal. The dashboard builds a complete prompt and automatically copies it to your clipboard.
+The dashboard includes a resume tailoring workflow. For each job in your Matches tab, click **Tailor** to open the tailor modal. The dashboard builds a complete prompt and automatically copies it to your clipboard.
 
 ### Workflow
 
@@ -192,7 +192,7 @@ The dashboard includes a one-click resume tailoring workflow. For each job in yo
 5. **Claude saves the result** as both `.docx` and `.pdf` in `resumes/archived/`, named by company (e.g. `YourName_resume_Acme.docx / .pdf`).
 6. **Claude registers it in the Resumes tab** of the dashboard automatically.
 
-> **Note:** The Tailor button generates a prompt and copies it to your clipboard. Due to how Cowork artifacts are sandboxed, it cannot send the prompt directly — you need to paste it into the chat yourself. This is a one-step paste, not a multi-step copy/paste process.
+> **Note:** The Tailor button generates a prompt and copies it to your clipboard. Due to how Cowork artifacts are sandboxed, it cannot send the prompt directly — you need to paste it into the chat yourself. 
 
 ### If No Base Resume Is Found
 
