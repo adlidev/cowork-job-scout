@@ -183,9 +183,18 @@ All data is stored in the **browser's localStorage** inside the Cowork artifact 
 
 **Important notes:**
 - Data persists between sessions as long as you use the same Cowork instance
-- Clearing browser/app storage will wipe all your data — there's no backup mechanism built in yet
 - Dismissed jobs have no "undo" — once dismissed, a job won't appear again
 - Data does not sync across devices
+
+### Backup and Restore
+
+The **Settings → Data Backup** section lets you export and restore all dashboard data as a JSON file.
+
+**Manual export:** Click **Export Backup** to download a snapshot of all your data (activities, settings, dismissed jobs, resume library, job cache) to your Downloads folder.
+
+**Auto-backup:** Set an interval (hourly, every 4 hours, or daily) and the dashboard will export automatically while it's open. Files are saved to your Downloads folder as `job-scout-backup-YYYY-MM-DD.json`. This only runs while the dashboard tab is open — it is not a background process.
+
+**Restore:** Click **Import Backup**, select a previously exported `.json` file, and the dashboard will restore all data and reload. This overwrites your current data, so use it carefully.
 
 ---
 
@@ -242,6 +251,16 @@ If Claude can't find a base resume in your jobsearch folder, it will stop and te
 
 ---
 
+## Skills Profile (Optional but Recommended)
+
+For better resume tailoring, create a `skills_profile.md` file in your jobsearch folder. This gives Claude standing rules to follow every time you use the Tailor Resume workflow — things like accurate framing of your coding ability, titles you've never held, experience you don't want claimed, and job search preferences.
+
+A starter template is included in this repo as `skills_profile_template.md`. Copy it to your jobsearch folder, rename it to `skills_profile.md`, and fill it in. Claude will find and read it automatically during resume tailoring.
+
+The tailor modal also shows a reminder tip pointing to this file.
+
+---
+
 ## Folder Structure (Recommended)
 
 ```
@@ -251,6 +270,7 @@ your-job-search-folder/
 │   ├── YourName_resume_Master.pdf
 │   └── archived/                      ← tailored resumes by company
 ├── dashboard.html                     ← this file (source of truth)
+├── skills_profile.md                  ← your resume tailoring rules (optional)
 └── README.md
 ```
 
