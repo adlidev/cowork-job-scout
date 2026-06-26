@@ -7,16 +7,16 @@ A self-updating job search dashboard that runs inside [Claude for Desktop](https
 ## Screenshots
 
 ### Job Matches
-![Matches tab](docs/screenshot-matches.svg)
+![Matches tab](docs/screenshot-matches.png)
 
 ### Job Search Log
-![Job Search Log](docs/screenshot-log.svg)
+![Job Search Log](docs/screenshot-log.png)
 
 ### Resume Library
-![Resumes tab](docs/screenshot-resumes.svg)
+![Resumes tab](docs/screenshot-resumes.png)
 
 ### Settings
-![Settings tab](docs/screenshot-settings.svg)
+![Settings tab](docs/screenshot-settings.png)
 
 ---
 
