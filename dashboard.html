@@ -755,7 +755,7 @@ function getEffectiveLocalAreaRe() {
   return new RegExp('\\b('+cities.join('|')+')\\b','i');
 }
 function isDefenseRole(job) {
-  const t=((job.title||'')+(job.summary||'')+(job.companyName||'')).toLowerCase();
+  const t=[job.title,job.summary,job.companyName].filter(Boolean).join(' ').toLowerCase();
   return /clearance|secret|top secret|\bdod\b|military|defense contractor|homeland security/.test(t);
 }
 function getJobArrangement(job) {
@@ -1203,7 +1203,7 @@ function renderActivities() {
   if (!ids.length) {
     tbody.innerHTML = `<tr><td colspan="8"><div class="act-empty">
       No activities logged yet.<br>
-      Hit <strong>Apply</strong> on any job in the Matches tab — it logs here automatically.<br>
+      Hit <strong>Mark Applied</strong> on any job in the Matches tab — it logs here automatically.<br>
       Or use <strong>+ Log a job search activity</strong> above to add any activity manually.<br>
       <span style="font-size:11px;color:#bbb;">Colorado requires 5 per week — keep records for 2 years.</span>
     </div></td></tr>`;
@@ -1528,7 +1528,7 @@ function isHybridOutsideLocalArea(job) {
 
 // ─── AI scoring ───────────────────────────────────────────────────────────────
 function keywordScore(job) {
-  const t = ((job.title||'')+(job.summary||'')+(job.companyName||'')).toLowerCase();
+  const t = [job.title,job.summary,job.companyName].filter(Boolean).join(' ').toLowerCase();
   let s = 4;
   if (/senior|staff|lead|principal/.test(t)) s++;
   if (/quality engineer|qa engineer|\bqe\b|sdet|test engineer|software developer in test/.test(t)) s += 2;
@@ -1697,7 +1697,7 @@ function renderJobRows() {
         <td class="date-cell">${formatDate(j.postedDate)}</td>
         <td class="action-cell">
           <button class="btn-apply" data-guid="${esc(j.guid)}"
-            onclick="markApplied('${esc(j.guid)}')">Apply</button>
+            onclick="markApplied('${esc(j.guid)}')">Mark Applied</button>
           <button class="btn-tailor" data-guid="${esc(j.guid)}"
             title="Ask Claude to tailor your resume for this role"
             onclick="tailorResume('${esc(j.guid)}')">&#128196; Tailor</button>

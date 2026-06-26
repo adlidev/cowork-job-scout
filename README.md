@@ -135,6 +135,34 @@ Jobs are hidden from results if they:
 
 When you open the dashboard, it checks whether the daily task has run recently (within 24 hours). If so, it shows those pre-scored results instantly. If not, or if you click **🔍 Live Search**, it runs fresh searches against all three job boards in real time (takes 1–2 minutes).
 
+### Job Search Log
+
+The **Job Search Log** tab is your activity tracker. It shows one week at a time and lets you navigate back and forward by week.
+
+**What gets logged automatically:**
+
+Clicking **Mark Applied** on a job in the Matches tab is the only action that creates an entry automatically. It records a *Job Application* activity with the company, role, source, and URL pre-filled, then switches to the Log tab so you can see it. The job is also removed from your Matches view so it doesn't show up again.
+
+> **Note:** Mark Applied records that you *intend to apply* (or have applied). It does not submit an application on your behalf — you still need to open the job URL and apply through the employer's site or job board.
+
+**What you log manually:**
+
+Everything else. Use **＋ Log a job search activity** to add any of the following:
+
+| Activity type | When to use it |
+|---|---|
+| **Job Application** | Applied to a role you found outside the dashboard |
+| **Employer Contact** | Reached out to a recruiter or hiring manager cold |
+| **Interview** | Phone screen, technical round, or panel interview |
+| **Job Fair / Career Event** | Attended a hiring event or career fair |
+| **Networking** | Coffee chat, referral conversation, LinkedIn message |
+| **Employment Agency** | Registered with or contacted a staffing agency |
+| **Skills Training / Workshop** | Course, certification, or skill-building activity |
+| **Resume / Profile Update** | Updated your resume, LinkedIn, or portfolio |
+| **Other** | Anything that doesn't fit the above |
+
+For Job Application entries, you can also track application status (Applied → Phone Screen → Interviewing → Offer / Rejected / Withdrawn / No Response) and update it as the process moves forward.
+
 ---
 
 ## Data Storage
