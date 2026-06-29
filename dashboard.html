@@ -277,6 +277,8 @@ tr:last-child td { border-bottom: none; }
 .week-export:hover { color: #1A3A5C; }
 .act-url-link { font-size: 11px; color: #1A3A5C; text-decoration: none; margin-left: 5px; opacity: 0.75; white-space: nowrap; }
 .act-url-link:hover { opacity: 1; text-decoration: underline; }
+.act-copy-url { font-size: 11px; background: none; border: none; cursor: pointer; color: #94a3b8; padding: 0 2px; margin-left: 2px; opacity: 0.7; vertical-align: middle; }
+.act-copy-url:hover { color: #1A3A5C; opacity: 1; }
 
 /* Tailor modal */
 .modal-overlay {
@@ -614,7 +616,13 @@ const PRELOADED_TIMESTAMP = null; // Set by daily task injection
       </div>
       <div class="settings-row">
         <div class="settings-field"><label>Brief Skills Summary (sent to AI scorer)</label>
-          <textarea id="st-profile" rows="4" placeholder="Describe your background, key skills, years of experience..."></textarea></div>
+          <textarea id="st-profile" rows="4" placeholder="Describe your background, key skills, years of experience..."></textarea>
+          <div style="margin-top:6px;display:flex;align-items:center;gap:8px;">
+            <button id="btn-gen-profile" onclick="generateProfileFromResume()" style="font-size:12px;padding:5px 12px;background:white;border:1px solid #94a3b8;border-radius:5px;color:#475569;cursor:pointer;">&#10024; Generate from Resume</button>
+            <span id="gen-profile-status" style="font-size:11px;color:#94a3b8;"></span>
+          </div>
+          <div style="font-size:11px;color:#64748b;margin-top:4px;">Requires a base resume saved in the Resume Content section below.</div>
+        </div>
       </div>
     </div>
     <div class="settings-section">
@@ -684,6 +692,16 @@ const PRELOADED_TIMESTAMP = null; // Set by daily task injection
             <textarea id="st-zr" rows="4" placeholder="e.g. quality engineer selenium"></textarea></div>
         </div>
       </details>
+    </div>
+    <div class="settings-section" style="background:#f8fafc;">
+      <h3>Resume Content</h3>
+      <div style="font-size:12px;color:#64748b;margin-bottom:8px;">Paste your full resume as plain text. Used by the <strong>&#10024; Generate from Resume</strong> button above and by Claude when tailoring.</div>
+      <textarea id="st-base-resume" rows="8" style="width:100%;box-sizing:border-box;font-family:inherit;font-size:13px;" placeholder="Paste your resume text here — name, contact, summary, experience, skills…"></textarea>
+      <div style="margin-top:16px;padding-top:16px;border-top:1px solid #e2e8f0;">
+        <label style="font-size:13px;font-weight:600;color:#374151;display:block;margin-bottom:4px;">Resume Preferences <span style="font-weight:400;color:#94a3b8;">&mdash; standing rules for tailoring</span></label>
+        <div style="font-size:12px;color:#64748b;margin-bottom:6px;">Things Claude should always remember when tailoring — e.g. titles you've held, tools you actually know, anything it should never claim.</div>
+        <textarea id="st-resume-prefs" rows="4" style="width:100%;box-sizing:border-box;font-family:inherit;font-size:13px;" placeholder="e.g. Only claim titles I have actually held. Do not overstate familiarity with tools I've only used briefly."></textarea>
+      </div>
     </div>
     <div class="settings-section" style="background:#f8fafc;">
       <h3>Data Backup</h3>
@@ -962,6 +980,21 @@ const APP_STATUSES = [
   { value: 'withdrawn',    label: 'Withdrawn',      color: '#6b7280', bg: '#f3f4f6' },
   { value: 'no_response',  label: 'No Response',    color: '#6b7280', bg: '#f0f0f0' },
 ];
+function copyActUrl(btn, url) {
+  navigator.clipboard.writeText(url).then(() => {
+    const prev = btn.textContent;
+    btn.textContent = '✓'; btn.style.color = '#16a34a';
+    setTimeout(() => { btn.textContent = prev; btn.style.color = ''; }, 1500);
+  }).catch(() => {
+    const ta = document.createElement('textarea');
+    ta.value = url; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select(); document.execCommand('copy');
+    document.body.removeChild(ta);
+    btn.textContent = '✓'; btn.style.color = '#16a34a';
+    setTimeout(() => { btn.textContent = '⎘'; btn.style.color = ''; }, 1500);
+  });
+}
+
 function statusInfo(val) {
   return APP_STATUSES.find(s => s.value === val) || APP_STATUSES[0];
 }
@@ -1266,7 +1299,7 @@ function renderActivities() {
     const rowStyle = inWeek ? '' : 'opacity:0.55;';
     const dateStr  = new Date(a.date + 'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
     const urlLink  = a.url
-      ? `<a class="act-url-link" href="${esc(a.url)}" title="${esc(a.url)}" target="_blank">↗ listing</a>`
+      ? `<a class="act-url-link" href="${esc(a.url)}" title="${esc(a.url)}" target="_blank">↗ listing</a><button class="act-copy-url" onclick="copyActUrl(this,${JSON.stringify(a.url)})" title="Copy URL to clipboard">⎘</button>`
       : '';
     let statusCell = '<td style="font-size:11px;color:#aaa;">—</td>';
     if (a.type === 'Job Application') {
@@ -2125,6 +2158,8 @@ function loadSettingsForm() {
   document.getElementById('st-zr').value     = s.zrSearchTerms     ? s.zrSearchTerms.join('\n')                 : '';
   const defaultMetro = LOCAL_AREA_RE.source.replace(/^\\b\(|\)\\b\/i$/g,'').split('|').filter(c=>c!=='remote').join(', ');
   document.getElementById('st-metro').value  = s.localMetroCities  ? s.localMetroCities.join(', ')               : defaultMetro;
+  document.getElementById('st-base-resume').value = s.baseResume || '';
+  document.getElementById('st-resume-prefs').value = s.skillsProfile || '';
 }
 function saveSettingsForm() {
   const arrangements = [...document.querySelectorAll('input[name="st-arrange"]:checked')].map(cb => cb.value);
@@ -2153,12 +2188,52 @@ function saveSettingsForm() {
     localMetroCities:  metro.length       ? metro       : null,
     scorePenaltyTerms: document.getElementById('st-penalty-terms').value
       .split(',').map(t => t.trim().toLowerCase()).filter(Boolean),
+    baseResume:   document.getElementById('st-base-resume').value,
+    skillsProfile: document.getElementById('st-resume-prefs').value,
   });
   const msg = document.getElementById('settings-saved-msg');
   msg.style.display = 'inline';
   setTimeout(() => msg.style.display = 'none', 2500);
   initAutoBackup();
 }
+async function generateProfileFromResume() {
+  const btn = document.getElementById('btn-gen-profile');
+  const status = document.getElementById('gen-profile-status');
+  const resume = document.getElementById('st-base-resume').value.trim();
+  if (!resume) {
+    status.textContent = 'Paste your resume in Resume Content below first.';
+    status.style.color = '#dc2626'; return;
+  }
+  btn.disabled = true; btn.textContent = '⏳ Generating…';
+  status.textContent = ''; status.style.color = '#94a3b8';
+  try {
+    const raw = await window.cowork.askClaude(
+      `Extract three fields from this resume and return ONLY a JSON object with no other text:\n\n- "name": the candidate's full name from the header\n- "location": city/state from the header (e.g. "Boulder, CO")\n- "summary": a comprehensive skills and background profile for AI job scoring. Write 3-5 sentences in first person covering: total years of experience, ALL specific tools/frameworks/languages/platforms mentioned ANYWHERE in the resume (read the full experience bullets, not just the top summary), seniority level, and domain expertise. Be specific and complete — list the actual technologies by name.\n\nRESUME:\n${resume.slice(0, 8000)}\n\nReturn only JSON: {"name":"...","location":"...","summary":"..."}`,
+      []
+    );
+    let parsed = null;
+    try { parsed = JSON.parse(raw.trim()); } catch {
+      const m = raw.match(/\{[\s\S]*\}/);
+      if (m) try { parsed = JSON.parse(m[0]); } catch {}
+    }
+    if (parsed && parsed.summary) {
+      document.getElementById('st-profile').value = parsed.summary;
+      if (parsed.name)     { const el = document.getElementById('st-name');     if (el && !el.value.trim()) el.value = parsed.name; }
+      if (parsed.location) { const el = document.getElementById('st-location'); if (el && !el.value.trim()) el.value = parsed.location; }
+      const filled = [parsed.name && 'name', parsed.location && 'location'].filter(Boolean);
+      const note = filled.length ? ` Also filled: ${filled.join(', ')}.` : '';
+      status.textContent = '✓ Done — click Save Settings to keep it.' + note; status.style.color = '#16a34a';
+    } else if (raw && raw.trim()) {
+      // fallback: treat raw text as the summary if JSON parse failed
+      document.getElementById('st-profile').value = raw.trim();
+      status.textContent = '✓ Done (plain text) — click Save Settings to keep it.'; status.style.color = '#16a34a';
+    } else {
+      status.textContent = 'No output returned.'; status.style.color = '#dc2626';
+    }
+  } catch(e) { status.textContent = 'Error: ' + e.message; status.style.color = '#dc2626'; }
+  finally { btn.disabled = false; btn.textContent = '✨ Generate from Resume'; }
+}
+
 function showResetConfirm() {
   document.getElementById('btn-reset-init').style.display = 'none';
   document.getElementById('reset-confirm-row').style.display = 'flex';
