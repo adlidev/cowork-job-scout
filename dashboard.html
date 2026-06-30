@@ -432,6 +432,7 @@ const PRELOADED_TIMESTAMP = null; // Set by daily task injection
   <div class="tab" onclick="switchTab('resumes')" data-tab="resumes">Resumes</div>
   <div class="tab" onclick="switchTab('skills')" data-tab="skills">Skills</div>
   <div class="tab" onclick="switchTab('settings')" data-tab="settings">⚙ Settings</div>
+  <div class="tab" onclick="switchTab('setup')" data-tab="setup">ℹ️ Setup &amp; Help</div>
 </div>
 
 <!-- Matches panel -->
@@ -878,6 +879,98 @@ const PRELOADED_TIMESTAMP = null; // Set by daily task injection
       <button class="btn-save-settings" onclick="saveSettingsForm()">Save Settings</button>
       <span class="settings-saved-msg" id="settings-saved-msg">&#x2713; Saved!</span>
     </div>
+  </div>
+</div>
+
+<!-- Setup & Help panel -->
+<div id="tab-setup" class="tab-panel">
+  <div class="settings-wrap">
+
+    <div class="settings-section" style="background:#f8fafc;">
+      <h3>What this is</h3>
+      <div style="font-size:13.5px;color:#374151;line-height:1.6;">
+        A job-search dashboard that runs as a <strong>Cowork artifact</strong> inside Claude Desktop. It searches Dice, Indeed, and ZipRecruiter for roles that match you, scores each one 1&ndash;10 with Claude Haiku, and keeps a job-search activity log you can use when filing for unemployment. <strong>All data stays in your browser&rsquo;s localStorage</strong> &mdash; nothing is sent to any server.
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <h3>1. Install the job-board connectors</h3>
+      <div style="font-size:13.5px;color:#374151;line-height:1.7;">
+        The dashboard searches job boards through Cowork MCP connectors. You need all three:
+        <ul style="margin:8px 0 0 0;padding-left:20px;">
+          <li style="margin-bottom:6px;"><strong>Dice</strong> &mdash; tech-focused job board</li>
+          <li style="margin-bottom:6px;"><strong>Indeed</strong> &mdash; broad job board (rate-limited; the dashboard handles retries automatically)</li>
+          <li style="margin-bottom:6px;"><strong>ZipRecruiter</strong> &mdash; broad job board</li>
+        </ul>
+        Install them from the Cowork plugin marketplace, or ask Claude: <em>&ldquo;What job board connectors are available in Cowork?&rdquo;</em>
+        <div style="margin-top:8px;color:#64748b;font-size:12.5px;">Once installed, each connector gets a unique MCP tool ID. If you share this dashboard with someone else, they need to update the tool IDs at the top of the script block &mdash; see <strong>Advanced: MCP tool IDs</strong> below.</div>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <h3>2. Set up your profile</h3>
+      <div style="font-size:13.5px;color:#374151;line-height:1.7;">
+        Open <a href="#" onclick="switchTab('settings');return false;" style="color:#1A3A5C;font-weight:600;">⚙ Settings</a> and fill in:
+        <ul style="margin:8px 0 0 0;padding-left:20px;">
+          <li style="margin-bottom:5px;"><strong>Your Profile</strong> &mdash; name, location, a short skills summary (used by the AI scorer)</li>
+          <li style="margin-bottom:5px;"><strong>Work Arrangement</strong> &mdash; remote / hybrid / on-site and commute range</li>
+          <li style="margin-bottom:5px;"><strong>Search Terms</strong> &mdash; the job titles and keywords to search on each board</li>
+          <li><strong>Salary Floor</strong> &mdash; hides jobs below your minimum (leave 0 to show everything)</li>
+        </ul>
+        Click <strong>Save Settings</strong> when done.
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <h3>3. Set up the daily search</h3>
+      <div style="font-size:13.5px;color:#374151;line-height:1.7;">
+        A Cowork scheduled task runs a fresh search every morning and caches results so the Matches tab is always up to date when you open it. To create the task, ask Claude in a new conversation:
+        <div style="background:#0f172a;color:#e2e8f0;border-radius:6px;padding:10px 14px;margin:10px 0;font-size:12.5px;font-family:ui-monospace,Menlo,monospace;line-height:1.5;">Set up a daily Cowork scheduled task that opens the job-match-dashboard artifact and runs a job search.</div>
+        The task fires once a day; you can open the Matches tab at any time and it shows the latest results. Use <strong>🔍 Live Search</strong> on the Matches tab to trigger a fresh search on demand.
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <h3>4. Day-to-day use</h3>
+      <div style="font-size:13.5px;color:#374151;line-height:1.7;">
+        <ul style="margin:0;padding-left:20px;">
+          <li style="margin-bottom:6px;"><strong>Matches</strong> &mdash; scored jobs, highest first. <strong>Mark Applied</strong> logs it to your activity log. <strong>&#128196; Tailor</strong> starts a resume tailoring conversation. <strong>&times;</strong> dismisses the job (reversible from the Dismissed tab). The <em>unscored results</em> toggle at the bottom shows jobs beyond the scoring cap with keyword estimates.</li>
+          <li style="margin-bottom:6px;"><strong>Job Search Log</strong> &mdash; your weekly activity tracker. Default is 5 activities/week (Colorado unemployment requirement &mdash; change it in Settings if your state differs). Use <strong>Export CSV</strong> for your records; keep them for at least 2 years in case of an audit.</li>
+          <li style="margin-bottom:6px;"><strong>Resumes</strong> &mdash; your base and tailored resumes. Add entries here after tailoring so you can track which resume went to which company.</li>
+          <li><strong>Settings &rarr; Scoring</strong> &mdash; adjust the scoring cap (how many jobs get AI-scored per run), penalty terms (lowers score for matching roles), and title gate (only score jobs whose title contains specific words).</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="settings-section" style="background:#f8fafc;">
+      <h3>Advanced: MCP tool IDs</h3>
+      <div style="font-size:13.5px;color:#374151;line-height:1.7;">
+        Each Cowork connector has a unique ID tied to your installation. The IDs used by this dashboard are set near the top of the script block:
+        <div style="background:#0f172a;color:#e2e8f0;border-radius:6px;padding:10px 14px;margin:10px 0;font-size:12.5px;font-family:ui-monospace,Menlo,monospace;line-height:1.6;">const DICE_TOOL   = 'mcp__&lt;uuid&gt;__search_jobs';<br>const INDEED_TOOL = 'mcp__&lt;uuid&gt;__search_jobs';<br>const ZR_TOOL     = 'mcp__&lt;uuid&gt;__search_jobs';</div>
+        If the searches stop working (jobs not returning, errors in console), your connector IDs may have changed. To find the current IDs, ask Claude: <em>&ldquo;What are the exact tool names for Dice, Indeed, and ZipRecruiter job search?&rdquo;</em> and update the three constants in the script.
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <h3>Your data &amp; privacy</h3>
+      <div style="font-size:13.5px;color:#374151;line-height:1.7;">
+        Everything &mdash; job cache, activity log, resumes, settings &mdash; is stored in <strong>localStorage</strong> in the Cowork artifact browser context. It persists across sessions on the same machine. To back it up, use <strong>Export CSV</strong> on the Job Search Log tab. Nothing is sent to any external server.
+        <div style="margin-top:8px;color:#dc2626;font-size:12.5px;">&#9888; Clearing your browser storage or resetting Cowork will wipe your data. Export your activity log regularly.</div>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <h3>Troubleshooting</h3>
+      <div style="font-size:13.5px;color:#374151;line-height:1.7;">
+        <ul style="margin:0;padding-left:20px;">
+          <li style="margin-bottom:6px;"><strong>No jobs showing after a search?</strong> Check that your connectors are installed, your search terms are set in Settings, and the board toggles (Settings &rarr; Job Sources) are enabled.</li>
+          <li style="margin-bottom:6px;"><strong>Indeed returns nothing or errors?</strong> Indeed rate-limits aggressively. The dashboard retries automatically. If it keeps failing, use the <strong>Skip Indeed</strong> button during live search and rely on Dice + ZipRecruiter.</li>
+          <li style="margin-bottom:6px;"><strong>Jobs scored 1&ndash;4 not appearing?</strong> They go into the unscored section. Toggle <em>Show unscored results</em> at the bottom of the Matches tab.</li>
+          <li><strong>Duplicate jobs appearing?</strong> The dashboard deduplicates by URL and company+title across boards. If you still see duplicates, they likely have slight title or company-name differences &mdash; dismiss the lower-scored one.</li>
+        </ul>
+      </div>
+    </div>
+
   </div>
 </div>
 
