@@ -28,8 +28,14 @@ A self-updating job search dashboard that runs inside [Claude for Desktop](https
 ### Resume Library
 ![Resumes tab](docs/screenshot-resumes.png)
 
+### Skills
+![Skills tab](docs/screenshot-skills.png)
+
+### Dismissed Jobs
+![Dismissed tab](docs/screenshot-dismissed.png)
+
 ### Settings
-![Settings tab](docs/screenshot-settings.png)
+![Settings tab](docs/screenshot-settings1.png)
 
 ---
 
@@ -73,7 +79,11 @@ const ZR_TOOL     = 'mcp__c73855fe-5ca0-4178-9fe0-23de8bc7512b__search_jobs'; //
 
 Replace each value with your own IDs and save the file.
 
-### Step 3 — Create the artifact in Claude
+### Step 3 — Connect your job search folder
+
+In Claude for Desktop (Cowork mode), click the folder icon in the top bar and select the folder where `dashboard.html` lives. This gives Claude access to read your base resume and save tailored resumes — both required for the tailoring workflow to work.
+
+### Step 4 — Create the artifact in Claude
 
 1. Open Claude for Desktop in Cowork mode
 2. Open a new conversation
@@ -85,7 +95,7 @@ Replace each value with your own IDs and save the file.
 
 4. The artifact will appear as **🎯 Job Match Dashboard** in your conversation.
 
-### Step 4 — Configure your profile and preferences
+### Step 5 — Configure your profile and preferences
 
 Click the **⚙ Settings** tab inside the dashboard and fill in:
 
@@ -98,7 +108,11 @@ Click the **⚙ Settings** tab inside the dashboard and fill in:
 
 Click **Save Settings** at the bottom when done.
 
-### Step 5 (Optional) — Set up the daily scheduled task
+Then open the **Resumes** tab and scroll down to **Resume Content** — paste your full resume as plain text. This is used by the AI scorer and the resume tailoring workflow.
+
+Optionally, open the **Skills** tab and add your key skills with years of experience and a confidence rating (1–5). Confident skills (4–5) boost the keyword score for jobs that mention them, and the AI scorer checks whether a job's "X+ years required" matches your actual experience.
+
+### Step 6 (Optional) — Set up the daily scheduled task
 
 The dashboard gets much more useful with a scheduled task that runs every morning and pre-populates fresh results before you even open it.
 
@@ -183,7 +197,7 @@ All data is stored in the **browser's localStorage** inside the Cowork artifact 
 
 **Important notes:**
 - Data persists between sessions as long as you use the same Cowork instance
-- Dismissed jobs have no "undo" — once dismissed, a job won't appear again
+- Dismissed jobs can be restored from the **Dismissed** tab (enable in Settings → Display)
 - Data does not sync across devices
 
 ### Backup and Restore
@@ -254,7 +268,7 @@ The dashboard includes a resume tailoring workflow. For each job in your Matches
 2. **Find a job** in the Matches tab and click the **Tailor** button next to it.
 3. **The modal opens with the prompt already copied to your clipboard.** Switch to the Claude chat window and paste it in.
 4. **Claude fetches the job listing** (if a URL is available), reads your base resume, and creates a tailored version — adjusting the summary, reordering bullets, and surfacing the most relevant experience. It does not fabricate anything.
-5. **Claude saves the result** as both `.docx` and `.pdf` in `resumes/archived/`, named by company (e.g. `YourName_resume_Acme.docx / .pdf`).
+5. **Claude saves the result** as both `.docx` and `.pdf` in `resumes/`, named by company (e.g. `YourName_resume_Acme.docx / .pdf`). Move it to `resumes/archived/` once you've submitted the application.
 6. **Claude registers it in the Resumes tab** of the dashboard automatically.
 
 > **Note:** The Tailor button generates a prompt and copies it to your clipboard. Due to how Cowork artifacts are sandboxed, it cannot send the prompt directly — you need to paste it into the chat yourself. 
@@ -292,7 +306,8 @@ your-job-search-folder/
 ├── resumes/
 │   ├── YourName_resume_Master.docx    ← base template
 │   ├── YourName_resume_Master.pdf
-│   └── archived/                      ← tailored resumes by company
+│   ├── YourName_resume_Acme.docx      ← tailored (active, move to archived/ after applying)
+│   └── archived/                      ← tailored resumes, post-application
 ├── dashboard.html                     ← this file (source of truth)
 ├── skills_profile.md                  ← your resume tailoring rules (optional)
 └── README.md
@@ -316,6 +331,27 @@ your-job-search-folder/
 
 **The daily task isn't injecting new jobs**  
 → Check your scheduled tasks in Claude. The task needs Cowork access to run the artifact update. Try running it manually by asking Claude to run the daily job search task.
+
+---
+
+## Related: Server-Based Fork
+
+A standalone Node.js fork of this dashboard was created by **[Drew Douglass](https://github.com/DrewDouglass)**, available at **[github.com/DrewDouglass/job-scout](https://github.com/DrewDouglass/job-scout)**.
+
+The fork is designed for users who don't have Claude for Desktop / Cowork but want similar functionality. It runs as a local server with a SQLite database, and uses different job sources.
+
+| | This version (Cowork) | Fork (job-scout) |
+|---|---|---|
+| **Requires** | Claude for Desktop with Cowork mode | Node.js (local server) |
+| **Job sources** | Dice, Indeed, ZipRecruiter (via Cowork plugins) | JSearch API (via RapidAPI), LinkedIn |
+| **AI scoring** | Claude Haiku (built into Cowork) | Claude Haiku (your own API key) or local Ollama |
+| **Storage** | Browser localStorage in artifact | SQLite database |
+| **Resume tailoring** | Claude reads/writes files via Cowork | Server-side via Node.js |
+| **Setup complexity** | Low — install plugins, create artifact | Medium — clone repo, run `npm start` |
+| **JSearch API credits** | Not needed | Required (free tier: limited monthly searches) |
+| **Works offline / no API spend** | No (requires Cowork) | Keyword scoring works without AI key |
+
+**Which to use:** If you have Claude for Desktop with Cowork, this version is simpler to set up and doesn't require managing API keys or a local server. The fork is the better option if Cowork isn't available or you want a server-backed setup with persistent SQLite storage and local AI via Ollama.
 
 ---
 
