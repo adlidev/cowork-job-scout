@@ -39,6 +39,7 @@ const {
   getEffectiveZrSearches,
   getEffectiveLocalAreaRe,
   parseIndeedResults,
+  skillMatchesText,
 } = require('./utils');
 
 // ─── normalizeForMatch ────────────────────────────────────────────────────────
@@ -368,6 +369,88 @@ describe('keywordScore', () => {
     const job = { title: 'Senior QA', summary: 'playwright selenium java automation', companyName: 'Acme', isRemote: true };
     assert.equal(keywordScore(job), keywordScore(job, []));
   });
+
+  it('skills boost: confident skill (4) matching job text adds +1', () => {
+    const job = { title: 'Senior QA Engineer', summary: 'pytest automation python', companyName: 'Acme', isRemote: true };
+    const base = keywordScore(job, []);
+    const withSkill = keywordScore(job, [], [{ name: 'pytest', confidence: 4, years: 5 }]);
+    assert.equal(withSkill, base + 1);
+  });
+
+  it('skills boost: low-confidence skill (3) does not boost score', () => {
+    const job = { title: 'Senior QA Engineer', summary: 'pytest automation', companyName: 'Acme', isRemote: true };
+    const base = keywordScore(job, []);
+    const withSkill = keywordScore(job, [], [{ name: 'pytest', confidence: 3, years: 5 }]);
+    assert.equal(withSkill, base);
+  });
+
+  it('skills boost: skill not present in job text does not boost score', () => {
+    const job = { title: 'Senior QA Engineer', summary: 'selenium java', companyName: 'Acme', isRemote: true };
+    const base = keywordScore(job, []);
+    const withSkill = keywordScore(job, [], [{ name: 'pytest', confidence: 5, years: 5 }]);
+    assert.equal(withSkill, base);
+  });
+
+  it('skills boost: capped at +2 even with many matching skills', () => {
+    const job = { title: 'Senior QA', summary: 'pytest python kubernetes datadog grafana', companyName: 'Acme', isRemote: true };
+    const base = keywordScore(job, []);
+    const skills = [
+      { name: 'pytest', confidence: 5, years: 5 },
+      { name: 'python', confidence: 5, years: 10 },
+      { name: 'kubernetes', confidence: 4, years: 3 },
+      { name: 'datadog', confidence: 5, years: 2 },
+    ];
+    const withSkills = keywordScore(job, [], skills);
+    assert.equal(withSkills, Math.min(10, base + 2));
+  });
+
+  it('skills boost: underqualified in years (job requires more than candidate has) — no boost', () => {
+    const job = { title: 'Senior QA', summary: '8+ years pytest experience required', companyName: 'Acme', isRemote: true };
+    const base = keywordScore(job, []);
+    const withSkill = keywordScore(job, [], [{ name: 'pytest', confidence: 5, years: 5 }]);
+    assert.equal(withSkill, base);
+  });
+
+  it('skills boost: qualified in years (candidate meets requirement) — boost applies', () => {
+    const job = { title: 'Senior QA', summary: '3+ years pytest experience required', companyName: 'Acme', isRemote: true };
+    const base = keywordScore(job, []);
+    const withSkill = keywordScore(job, [], [{ name: 'pytest', confidence: 5, years: 5 }]);
+    assert.equal(withSkill, base + 1);
+  });
+
+  it('skills boost: total score still capped at 10', () => {
+    const job = { title: 'Senior Staff SDET pytest automation Python remote', summary: 'api test pytest python automation', companyName: 'Acme', isRemote: true };
+    const withSkills = keywordScore(job, [], [
+      { name: 'pytest', confidence: 5, years: 5 },
+      { name: 'python', confidence: 5, years: 10 },
+    ]);
+    assert.ok(withSkills <= 10);
+  });
+});
+
+// ─── skillMatchesText ─────────────────────────────────────────────────────────
+
+describe('skillMatchesText', () => {
+  it('matches single-word skill', () => {
+    assert.ok(skillMatchesText('pytest', 'experience with pytest automation'));
+  });
+
+  it('does not match partial word (word boundary)', () => {
+    assert.ok(!skillMatchesText('java', 'javascript and typescript'));
+  });
+
+  it('matches any significant word in multi-word skill name', () => {
+    assert.ok(skillMatchesText('GitHub Actions', 'CI/CD using github actions pipeline'));
+  });
+
+  it('returns false when skill not present in text', () => {
+    assert.ok(!skillMatchesText('kubernetes', 'java selenium testing'));
+  });
+
+  it('ignores short words (<=2 chars) in skill name', () => {
+    // "CI" is 2 chars, filtered out — only "CD" which is also 2 chars — neither matches
+    assert.ok(!skillMatchesText('CI/CD', 'build and deploy pipeline'));
+  });
 });
 
 // ─── scoreClass ───────────────────────────────────────────────────────────────
@@ -471,28 +554,50 @@ describe('getWeekBounds', () => {
 // ─── getEffectiveDiceSearches ─────────────────────────────────────────────────
 
 describe('getEffectiveDiceSearches', () => {
-  const fallback = ['senior qa engineer remote', 'sdet remote'];
+  const fallback = ['senior qa engineer', 'sdet'];
 
-  it('uses fallback when no searchTerms configured', () => {
-    assert.deepEqual(getEffectiveDiceSearches({ searchTerms: [] }, fallback), fallback);
-  });
-  it('appends "remote" to each searchTerm', () => {
-    const result = getEffectiveDiceSearches({ searchTerms: ['senior qa engineer', 'staff qe'] }, fallback);
+  it('uses fallback when no diceSearchTerms or searchTerms configured', () => {
+    const result = getEffectiveDiceSearches({ workArrangements: ['remote'] }, fallback);
+    // fallback terms get "remote" appended when wantsRemote
     assert.ok(result.includes('senior qa engineer remote'));
-    assert.ok(result.includes('staff qe remote'));
+    assert.ok(result.includes('sdet remote'));
   });
-  it('merges extra diceSearchTerms', () => {
+  it('uses diceSearchTerms when configured (per-board)', () => {
+    const result = getEffectiveDiceSearches({
+      diceSearchTerms: ['staff qe', 'automation engineer'],
+      searchTerms: ['should not appear'],
+      workArrangements: ['remote'],
+    }, fallback);
+    assert.ok(result.includes('staff qe remote'));
+    assert.ok(result.includes('automation engineer remote'));
+    assert.equal(result.includes('should not appear remote'), false);
+  });
+  it('falls back to searchTerms when no diceSearchTerms', () => {
     const result = getEffectiveDiceSearches({
       searchTerms: ['senior qa engineer'],
-      diceSearchTerms: ['automation engineer python'],
+      workArrangements: ['remote'],
     }, fallback);
     assert.ok(result.includes('senior qa engineer remote'));
-    assert.ok(result.includes('automation engineer python'));
   });
-  it('deduplicates identical terms', () => {
+  it('appends "remote" when wantsRemote (workArrangements includes remote)', () => {
     const result = getEffectiveDiceSearches({
-      searchTerms: ['senior qa engineer'],
+      diceSearchTerms: ['senior qa engineer'],
+      workArrangements: ['remote'],
+    }, fallback);
+    assert.ok(result.includes('senior qa engineer remote'));
+  });
+  it('does not append "remote" when workArrangements excludes remote', () => {
+    const result = getEffectiveDiceSearches({
+      diceSearchTerms: ['senior qa engineer'],
+      workArrangements: ['onsite', 'hybrid'],
+    }, fallback);
+    assert.ok(result.includes('senior qa engineer'));
+    assert.equal(result.includes('senior qa engineer remote'), false);
+  });
+  it('does not double-append "remote" if term already contains it', () => {
+    const result = getEffectiveDiceSearches({
       diceSearchTerms: ['senior qa engineer remote'],
+      workArrangements: ['remote'],
     }, fallback);
     assert.equal(result.filter(t => t === 'senior qa engineer remote').length, 1);
   });
@@ -501,30 +606,35 @@ describe('getEffectiveDiceSearches', () => {
 // ─── getEffectiveIndeedSearches ───────────────────────────────────────────────
 
 describe('getEffectiveIndeedSearches', () => {
-  const fallback = [{ q: 'senior qa engineer', loc: 'remote' }];
+  const fallback = ['senior qa engineer', 'sdet'];
 
-  it('uses fallback when no searchTerms', () => {
-    assert.deepEqual(getEffectiveIndeedSearches({ searchTerms: [] }, fallback), fallback);
+  it('uses fallback (string[]) when no per-board or legacy terms', () => {
+    const result = getEffectiveIndeedSearches({}, fallback);
+    assert.deepEqual(result[0], { q: 'senior qa engineer', loc: 'remote' });
   });
-  it('maps searchTerms to {q, loc:"remote"} objects', () => {
+  it('uses indeedSearchTerms when configured (per-board)', () => {
+    const result = getEffectiveIndeedSearches({
+      indeedSearchTerms: ['staff qe'],
+      searchTerms: ['should not appear'],
+    }, fallback);
+    assert.ok(result.some(x => x.q === 'staff qe'));
+    assert.equal(result.some(x => x.q === 'should not appear'), false);
+  });
+  it('falls back to searchTerms when no indeedSearchTerms', () => {
     const result = getEffectiveIndeedSearches({ searchTerms: ['senior qa engineer'] }, fallback);
     assert.deepEqual(result[0], { q: 'senior qa engineer', loc: 'remote' });
   });
-  it('parses pipe-separated q|loc in indeedSearchTerms', () => {
+  it('parses pipe-separated q|loc', () => {
     const result = getEffectiveIndeedSearches({
-      searchTerms: ['senior qa engineer'],
       indeedSearchTerms: ['staff engineer|denver co'],
     }, fallback);
     assert.ok(result.some(x => x.q === 'staff engineer' && x.loc === 'denver co'));
   });
-  it('deduplicates by q — base takes priority over extra', () => {
+  it('deduplicates by q', () => {
     const result = getEffectiveIndeedSearches({
-      searchTerms: ['senior qa engineer'],
-      indeedSearchTerms: ['senior qa engineer|austin tx'],
+      indeedSearchTerms: ['senior qa engineer', 'senior qa engineer|austin tx'],
     }, fallback);
-    const matches = result.filter(x => x.q === 'senior qa engineer');
-    assert.equal(matches.length, 1);
-    assert.equal(matches[0].loc, 'remote'); // base wins
+    assert.equal(result.filter(x => x.q === 'senior qa engineer').length, 1);
   });
 });
 
@@ -533,20 +643,25 @@ describe('getEffectiveIndeedSearches', () => {
 describe('getEffectiveZrSearches', () => {
   const fallback = ['software engineer', 'senior developer'];
 
-  it('uses fallback when no searchTerms', () => {
-    assert.deepEqual(getEffectiveZrSearches({ searchTerms: [] }, fallback), fallback);
+  it('uses fallback when no per-board or legacy terms', () => {
+    assert.deepEqual(getEffectiveZrSearches({}, fallback), fallback);
   });
-  it('uses searchTerms directly — no "remote" suffix added', () => {
+  it('uses zrSearchTerms when configured (per-board)', () => {
+    const result = getEffectiveZrSearches({
+      zrSearchTerms: ['senior qa engineer'],
+      searchTerms: ['should not appear'],
+    }, fallback);
+    assert.ok(result.includes('senior qa engineer'));
+    assert.equal(result.includes('should not appear'), false);
+  });
+  it('falls back to searchTerms when no zrSearchTerms', () => {
     const result = getEffectiveZrSearches({ searchTerms: ['senior qa engineer'] }, fallback);
     assert.ok(result.includes('senior qa engineer'));
-    assert.equal(result.includes('senior qa engineer remote'), false);
   });
-  it('merges extra zrSearchTerms', () => {
-    const result = getEffectiveZrSearches({
-      searchTerms: ['senior qa engineer'],
-      zrSearchTerms: ['automation engineer'],
-    }, fallback);
-    assert.ok(result.includes('automation engineer'));
+  it('does not append "remote" suffix', () => {
+    const result = getEffectiveZrSearches({ zrSearchTerms: ['senior qa engineer'] }, fallback);
+    assert.ok(result.includes('senior qa engineer'));
+    assert.equal(result.includes('senior qa engineer remote'), false);
   });
 });
 

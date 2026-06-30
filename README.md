@@ -12,7 +12,9 @@ A self-updating job search dashboard that runs inside [Claude for Desktop](https
 - **Job search log** — track applications, interviews, networking contacts, and follow-ups
 - **Resume library** — keep your active and archived resumes in one tab, with tailored versions per company
 - **AI resume tailoring** — ask Claude to tailor your base resume for any job directly from the dashboard
-- **Live Search** — bypass the daily cache and run a fresh search on demand
+- **Live Search** — bypass the daily cache and run a fresh search on demand, with cancel and Skip Indeed controls
+- **Unscored results** — jobs beyond the AI scoring cap are shown separately with keyword estimates; AI Score, Mark Applied, or Tailor any listing directly from that section
+- **Update notifications** — a banner appears when a new release is available on GitHub
 - **Fully configurable** — all preferences managed in a Settings tab, no code editing required
 
 ---
@@ -104,7 +106,7 @@ Click the **⚙ Settings** tab inside the dashboard and fill in:
 | **Your Profile** | Your name, location, and a description of your skills and experience (this is sent to Claude when scoring jobs) |
 | **Job Preferences** | Work arrangement (remote/hybrid/on-site), commute range, minimum salary, defense role preference, and weekly activity goal |
 | **Local Metro Cities** | Cities within commute range — use the **Auto-fill** button if you've set your location and commute range |
-| **Search Terms** | Job titles to search for across all three boards (e.g. `senior software engineer`, `staff engineer`) |
+| **Search Terms** | Job titles to search per board — one per line. Use "Copy Dice terms to all" to start with the same list on each board, then customize. |
 
 Click **Save Settings** at the bottom when done.
 
@@ -148,6 +150,12 @@ Jobs are hidden from results if they:
 ### Preloaded vs. Live Search
 
 When you open the dashboard, it checks whether the daily task has run recently (within 24 hours). If so, it shows those pre-scored results instantly. If not, or if you click **🔍 Live Search**, it runs fresh searches against all three job boards in real time (takes 1–2 minutes).
+
+During a live search, a **✕ Cancel** button appears next to Live Search — clicking it stops the search after the current in-flight request completes and discards any results gathered so far.
+
+Indeed is rate-limited by the Cowork plugin. If a rate limit is hit, the dashboard shows a countdown and waits automatically before retrying. An **⏭ Skip Indeed** button appears during the wait — clicking it cancels remaining Indeed queries and moves on to ZipRecruiter, keeping any Indeed results already collected.
+
+Per-board searching can be toggled in **Settings → Search Terms** — uncheck Dice, Indeed, or ZipRecruiter to exclude that source entirely from live searches.
 
 ### Job Search Log
 
@@ -216,9 +224,9 @@ The **Settings → Data Backup** section lets you export and restore all dashboa
 
 ### Search Terms
 
-The **Settings → Search Terms** section controls what gets searched on each job board. One job title per line. The dashboard automatically formats these for each service (Dice appends "remote", Indeed pairs with a location, ZipRecruiter uses as job role).
+The **Settings → Search Terms** section has three independent textareas — one per board (Dice, Indeed, ZipRecruiter) — each with its own enable/disable checkbox. One search term per line. Use **Copy Dice terms to all** to sync the same list across all three boards as a starting point, then customize per-board as needed.
 
-For specialized searches, expand the **Advanced** section to add extra terms per service.
+The dashboard automatically formats terms for each service: Dice appends `" remote"` to each term (unless it already contains "remote"), Indeed pairs with a location field (`term | city` — defaults to `remote`), and ZipRecruiter uses the term as a job role query. Uncheck a board's checkbox to skip it entirely during live searches and the daily scheduled task.
 
 ### Candidate Profile
 
@@ -227,6 +235,10 @@ The profile in **Settings → Your Profile** is a free-text description sent to 
 ### Scoring Adjustments
 
 Scoring is fully configurable — no need to edit code.
+
+**AI Scoring Cap (Settings → Scoring)**
+
+Controls how many jobs are sent to Claude Haiku for scoring per search. Jobs beyond the cap are not shown in results by default, but appear in an **unscored results** section below the matches table (toggle with the checkbox). Each unscored listing shows a keyword-based estimate score (marked with `~`) and has three action buttons: **⚡ AI Score** (gets a real AI score — if 5 or higher, the job moves into the main results automatically with a green flash), **Mark Applied**, and **📄 Tailor**. Default cap: 60. Higher values surface more matches but increase search time (roughly 10–15 seconds per additional 20 jobs).
 
 **Score Penalty Keywords (Settings → Scoring)**
 

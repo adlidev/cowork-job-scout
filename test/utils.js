@@ -132,7 +132,13 @@ function isHybridOutsideLocalArea(job, localAreaRe) {
   return true;
 }
 
-function keywordScore(job, penaltyTerms) {
+// Return true if any significant word in skillName appears in text (word-boundary aware).
+function skillMatchesText(skillName, text) {
+  const parts = skillName.toLowerCase().split(/[\/,\s\-]+/).filter(p => p.length > 2);
+  return parts.some(p => new RegExp('\\b' + p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b').test(text));
+}
+
+function keywordScore(job, penaltyTerms, skillsItems) {
   const terms = penaltyTerms || [];
   const t = [job.title, job.summary, job.companyName].filter(Boolean).join(' ').toLowerCase();
   let s = 4;
@@ -147,6 +153,23 @@ function keywordScore(job, penaltyTerms) {
       terms.map(term => (/^\w/.test(term) ? '\\b' : '') + term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + (/\w$/.test(term) ? '\\b' : '')).join('|')
     );
     if (penaltyRe.test(t)) s = Math.max(1, s - 1);
+  }
+  // Skills boost: confident skills (4-5) that appear in the job text add up to +2 total.
+  const skills = Array.isArray(skillsItems) ? skillsItems : [];
+  if (skills.length) {
+    let skillBoost = 0;
+    for (const sk of skills) {
+      if (!sk.name || sk.confidence < 4) continue;
+      if (!skillMatchesText(sk.name, t)) continue;
+      // If job text mentions "X+ years" of this skill, check candidate's years.
+      const skParts = sk.name.toLowerCase().split(/[\/,\s\-]+/).filter(p => p.length > 2);
+      const yrsPattern = skParts.map(p => p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|');
+      const yrsRe = new RegExp('(\\d+)\\+?\\s*(?:years?|yrs?)[^.]*(?:' + yrsPattern + ')', 'i');
+      const yrsMatch = t.match(yrsRe);
+      if (yrsMatch && parseInt(yrsMatch[1]) > (sk.years || 0)) continue; // underqualified in years
+      skillBoost = Math.min(2, skillBoost + 1);
+    }
+    s = Math.min(10, s + skillBoost);
   }
   return Math.min(10, s);
 }
@@ -188,50 +211,45 @@ function getDismissedJobKeys(dismissedMap) {
 /**
  * getEffectiveDiceSearches — parameterized version.
  * @param {Object} settings — the settings object
- * @param {string[]} fallback — default searches if no searchTerms configured
+ * @param {string[]} fallback — default searches if no diceSearchTerms or searchTerms configured
  */
 function getEffectiveDiceSearches(settings, fallback = []) {
-  const base = settings.searchTerms && settings.searchTerms.length
-    ? settings.searchTerms.map(t => t + ' remote')
+  const terms = settings.diceSearchTerms && settings.diceSearchTerms.length ? settings.diceSearchTerms
+    : settings.searchTerms && settings.searchTerms.length ? settings.searchTerms
     : fallback;
-  const extra = settings.diceSearchTerms && settings.diceSearchTerms.length
-    ? settings.diceSearchTerms
-    : [];
-  return [...new Set([...base, ...extra])];
+  const wantsRemote = !settings.workArrangements || settings.workArrangements.includes('remote');
+  return [...new Set(terms.map(t => t.trim()).filter(Boolean).map(t => {
+    if (!wantsRemote || /\bremote\b/i.test(t)) return t;
+    return t + ' remote';
+  }))];
 }
 
 /**
  * getEffectiveIndeedSearches — parameterized version.
  * @param {Object} settings — the settings object
- * @param {Array<{q,loc}>} fallback — default searches if no searchTerms configured
+ * @param {string[]} fallback — q strings to use if no per-board or legacy terms configured
  */
 function getEffectiveIndeedSearches(settings, fallback = []) {
-  const base = settings.searchTerms && settings.searchTerms.length
-    ? settings.searchTerms.map(t => ({ q: t, loc: 'remote' }))
+  const lines = settings.indeedSearchTerms && settings.indeedSearchTerms.length ? settings.indeedSearchTerms
+    : settings.searchTerms && settings.searchTerms.length ? settings.searchTerms
     : fallback;
-  const extra = settings.indeedSearchTerms && settings.indeedSearchTerms.length
-    ? settings.indeedSearchTerms.map(line => {
-        const [q, loc] = line.split('|').map(x => x.trim());
-        return { q: q || line.trim(), loc: loc || 'remote' };
-      })
-    : [];
-  const seen = new Set(base.map(x => x.q));
-  return [...base, ...extra.filter(x => !seen.has(x.q))];
+  const seen = new Set();
+  return lines.map(line => {
+    const [q, loc] = line.split('|').map(x => x.trim());
+    return { q: q || line.trim(), loc: loc || 'remote' };
+  }).filter(x => { if (!x.q || seen.has(x.q)) return false; seen.add(x.q); return true; });
 }
 
 /**
  * getEffectiveZrSearches — parameterized version.
  * @param {Object} settings — the settings object
- * @param {string[]} fallback — default searches if no searchTerms configured
+ * @param {string[]} fallback — default searches if no per-board or legacy terms configured
  */
 function getEffectiveZrSearches(settings, fallback = []) {
-  const base = settings.searchTerms && settings.searchTerms.length
-    ? settings.searchTerms
+  const terms = settings.zrSearchTerms && settings.zrSearchTerms.length ? settings.zrSearchTerms
+    : settings.searchTerms && settings.searchTerms.length ? settings.searchTerms
     : fallback;
-  const extra = settings.zrSearchTerms && settings.zrSearchTerms.length
-    ? settings.zrSearchTerms
-    : [];
-  return [...new Set([...base, ...extra])];
+  return [...new Set(terms.map(t => t.trim()).filter(Boolean))];
 }
 
 /**
@@ -294,6 +312,7 @@ module.exports = {
   meetsMinSalary,
   isNonSalaried,
   isHybridOutsideLocalArea,
+  skillMatchesText,
   keywordScore,
   getAppliedJobKeys,
   getDismissedJobKeys,
