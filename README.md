@@ -35,7 +35,7 @@ A self-updating job search dashboard that runs inside [Claude for Desktop](https
 ![Dismissed tab](docs/screenshot-dismissed.png)
 
 ### Settings
-![Settings tab](docs/screenshot-settings1.png)
+![Settings tab](docs/screenshot-settings.png)
 
 ---
 
