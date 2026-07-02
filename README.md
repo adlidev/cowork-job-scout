@@ -226,7 +226,13 @@ The **Settings → Data Backup** section lets you export and restore all dashboa
 
 The **Settings → Search Terms** section has three independent textareas — one per board (Dice, Indeed, ZipRecruiter) — each with its own enable/disable checkbox. One search term per line. Use **Copy Dice terms to all** to sync the same list across all three boards as a starting point, then customize per-board as needed.
 
-The dashboard automatically formats terms for each service: Dice appends `" remote"` to each term (unless it already contains "remote"), Indeed pairs with a location field (`term | city` — defaults to `remote`), and ZipRecruiter uses the term as a job role query. Uncheck a board's checkbox to skip it entirely during live searches and the daily scheduled task.
+The dashboard automatically generates the right searches based on your **Work Arrangement** setting (Settings → Job Preferences) — you don't need to add location keywords manually:
+
+- **Dice** — for remote arrangements, appends `" remote"` to each term; for local/hybrid, uses the plain term with no location suffix (Dice's radius filter handles proximity)
+- **Indeed** — for remote, sets the location field to `"remote"`; for local/hybrid, sets it to your location from Settings
+- **ZipRecruiter** — sets `location_types` dynamically (`REMOTE`, `HYBRID`, and/or `IN_PERSON`) based on your selected arrangements
+
+Uncheck a board's checkbox to skip it entirely during live searches and the daily scheduled task.
 
 ### Candidate Profile
 
@@ -238,31 +244,25 @@ Scoring is fully configurable — no need to edit code.
 
 **AI Scoring Cap (Settings → Scoring)**
 
-Controls how many jobs are sent to Claude Haiku for scoring per search. Jobs beyond the cap are not shown in results by default, but appear in an **unscored results** section below the matches table (toggle with the checkbox). Each unscored listing shows a keyword-based estimate score (marked with `~`) and has three action buttons: **⚡ AI Score** (gets a real AI score — if 5 or higher, the job moves into the main results automatically with a green flash), **Mark Applied**, and **📄 Tailor**. Default cap: 60. Higher values surface more matches but increase search time (roughly 10–15 seconds per additional 20 jobs).
+Controls how many jobs are sent to Claude Haiku for scoring per search. Jobs beyond the cap appear in an **unscored results** section below the matches table (toggle with the checkbox). Each unscored listing shows a keyword-based estimate score (marked with `~`) and has three action buttons: **⚡ AI Score** (gets a real AI score — if it meets your minimum score threshold, the job moves into main results automatically with a green flash), **Mark Applied**, and **📄 Tailor**. Use **⚡ Score next [N] unscored** to bulk-score a batch at once. Default cap: 60. Higher values surface more matches but increase search time.
+
+**Minimum Score to Show (Settings → Scoring)**
+
+Jobs scoring below this threshold are filtered out of the matched results. Default: 5. Lower it (e.g. to 3) to surface more results; raise it to tighten the list. Applies to AI scores and keyword estimates alike.
 
 **Score Penalty Keywords (Settings → Scoring)**
 
-If a job mentions technologies or industries you'd rather deprioritize, add them here as a comma-separated list (e.g. `java, selenium, playwright, c#`). Any job whose title, company name, or summary contains one of these terms will have its keyword score reduced by 1 (floor: 1). Word boundaries are respected, so `java` won't penalise jobs that only mention `javascript`.
+Applies to the **keyword fallback scorer only** — not to AI scoring. Add comma-separated terms for technologies or industries you'd rather deprioritize (e.g. `java, embedded, mobile`). Any job whose title, company name, or summary contains a term will have its keyword score reduced by 1 (floor: 1). Word boundaries are respected, so `java` won't penalise jobs that only mention `javascript`.
 
-This setting is blank by default so the dashboard works neutrally out of the box for anyone using it. Only add terms that reflect *your* stack and preferences.
-
-**How `skills_profile.md` feeds into scoring**
-
-The `skills_profile.md` file in your jobsearch folder is not read automatically during job scoring — it's designed for resume tailoring. However, you can use it to decide what penalty terms to add:
-
-1. Review your `skills_profile.md` to identify technologies you have little or no experience with, or industries you want to avoid.
-2. Add those as comma-separated terms in **Settings → Scoring → Score Penalty Keywords**.
-3. Jobs requiring those stacks will score slightly lower, surfacing better-matched roles at the top.
-
-This keeps the penalty logic in Settings (easy to change, personal to you) rather than hardcoded in the dashboard file.
+This setting is blank by default. Only add terms that reflect *your* stack and preferences.
 
 **AI scoring prompt**
 
-The full AI score is determined by Claude Haiku using the profile text in **Settings → Your Profile**. The more specific you are — core skills, seniority, what you're looking for — the better the AI scores will be. The penalty terms you set are also included in this prompt automatically.
+The full AI score is determined by Claude Haiku using the profile text in **Settings → Your Profile** and your Skills tab entries (years of experience + confidence 1–5). The AI boosts scores for jobs that require skills you've marked as high-confidence (4–5) and checks "X+ years required" claims against your listed years. The more specific your profile, the better the scores will be.
 
 **Keyword fallback**
 
-The `keywordScore()` function in the script provides fast keyword-based scores used while AI scoring is running, and as a fallback when it fails or times out. Its built-in rules reward seniority titles, QA/automation role signals, remote positions, and Python/pytest; they penalise defense/clearance and junior-level signals. You generally don't need to modify it — use the Settings penalty terms instead.
+The `keywordScore()` function provides fast keyword-based scores used as a fallback when AI scoring fails or for jobs beyond the scoring cap. Its built-in rules reward seniority titles, QA/automation role signals, remote positions, and Python/pytest keywords; they penalise defense/clearance and junior-level signals. You generally don't need to modify it — use the Settings penalty terms to layer in your own adjustments.
 
 ### Defense/Clearance Roles
 

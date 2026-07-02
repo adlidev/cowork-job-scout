@@ -450,6 +450,7 @@ const PRELOADED_TIMESTAMP = null; // Set by daily task injection
   </div>
   <div id="matches-content" style="display:none;">
     <div class="stats-bar" id="stats-bar"></div>
+    <div id="fetch-stats-bar" style="display:none;font-size:11px;color:#94a3b8;padding:2px 0 6px 0;"></div>
     <div class="table-wrap">
       <table>
         <thead>
@@ -464,11 +465,15 @@ const PRELOADED_TIMESTAMP = null; // Set by daily task injection
     <div class="disclaimer" id="disclaimer"></div>
     <div style="font-size:11px;color:#aaa;margin-top:6px;padding:0 2px;" id="key-status"></div>
     <div id="pipeline-bar" style="display:none;" class="pipeline-bar"></div>
-    <div id="unscored-toggle-row" style="display:none;margin-top:16px;padding-top:12px;border-top:1px solid #e2e8f0;">
+    <div id="unscored-toggle-row" style="display:none;margin-top:16px;padding-top:12px;border-top:1px solid #e2e8f0;align-items:center;gap:16px;flex-wrap:wrap;">
       <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:#64748b;">
         <input type="checkbox" id="chk-show-unscored" onchange="toggleUnscoredSection(this.checked)">
         <span id="unscored-toggle-label">Show unscored results</span>
       </label>
+      <div style="display:flex;align-items:center;gap:6px;margin-left:auto;">
+        <input id="bulk-score-n" type="number" min="1" max="100" value="20" style="width:52px;padding:3px 6px;border:1px solid #e2e8f0;border-radius:5px;font-size:12px;color:#334155;" title="Number of unscored jobs to AI-score">
+        <button id="btn-bulk-score" onclick="scoreBulkUnscored()" style="font-size:12px;padding:4px 10px;background:#0ea5e9;color:white;border:none;border-radius:5px;cursor:pointer;">Score Next</button>
+      </div>
     </div>
     <div id="unscored-section" style="display:none;margin-top:12px;">
       <div style="font-size:12px;color:#94a3b8;margin-bottom:8px;">These jobs were fetched but not sent to AI scoring (cap reached). Scores shown are keyword estimates only. Click <strong>AI Score</strong> to get an AI score for any individual listing.</div>
@@ -793,18 +798,23 @@ const PRELOADED_TIMESTAMP = null; // Set by daily task injection
       <h3>Scoring</h3>
       <div class="settings-field">
         <label>Title Must Contain <span style="font-weight:400;color:#94a3b8">— pre-score gate: drop jobs whose title matches none of these</span></label>
-        <div style="font-size:11px;color:#64748b;margin-bottom:6px;">Comma-separated keywords. Jobs whose title contains none of them are dropped before scoring, saving credits and cutting noise. Leave blank to score everything. Example: <code style="background:#f1f5f9;padding:1px 4px;border-radius:3px;">qa, quality, sdet, test, automation</code></div>
-        <input id="st-title-require" class="form-input" placeholder="e.g. qa, quality, sdet, test, automation" style="width:100%;box-sizing:border-box;" />
+        <div style="font-size:11px;color:#64748b;margin-bottom:6px;">Comma-separated keywords. Jobs whose title contains none of them are dropped before scoring, saving credits and cutting noise. Leave blank to score everything. Example: <code style="background:#f1f5f9;padding:1px 4px;border-radius:3px;">engineer, developer, architect, backend</code></div>
+        <input id="st-title-require" class="form-input" placeholder="Leave blank to score all titles" style="width:100%;box-sizing:border-box;" />
       </div>
       <div class="settings-field" style="margin-top:12px;">
-        <label>Score Penalty Keywords <span style="font-weight:400;color:#94a3b8">— jobs mentioning these get a &minus;1 score</span></label>
-        <div style="font-size:11px;color:#64748b;margin-bottom:6px;">Comma-separated terms. Use for technologies or industries you&#x2019;d rather deprioritize. Leave blank for no penalty. Example: <code style="background:#f1f5f9;padding:1px 4px;border-radius:3px;">java, selenium, playwright, appium</code></div>
-        <input id="st-penalty-terms" class="form-input" placeholder="e.g. java, selenium, playwright, appium, c#" style="width:100%;box-sizing:border-box;" />
+        <label>Score Penalty Keywords <span style="font-weight:400;color:#94a3b8">— keyword scorer: &minus;1 per match</span></label>
+        <div style="font-size:11px;color:#64748b;margin-bottom:6px;">Comma-separated terms. Applied to the keyword fallback scorer only (not AI scoring). Jobs whose title or summary contains a term lose 1 point. Leave blank for no penalty.</div>
+        <input id="st-penalty-terms" class="form-input" placeholder="Leave blank for no penalty" style="width:100%;box-sizing:border-box;" />
       </div>
       <div class="settings-field" style="margin-top:12px;">
         <label>AI Scoring Cap <span style="font-weight:400;color:#94a3b8">— max jobs sent to Haiku for scoring</span></label>
         <div style="font-size:11px;color:#64748b;margin-bottom:6px;">Jobs beyond this limit are silently dropped (not shown in results). Higher values surface more matches but increase search time — each additional 20 jobs adds roughly 10–15 seconds. Default: 60.</div>
         <input id="st-scoring-cap" type="number" min="10" max="200" step="10" class="form-input" style="width:100px;" />
+      </div>
+      <div class="settings-field" style="margin-top:12px;">
+        <label>Minimum Score to Show <span style="font-weight:400;color:#94a3b8">— hide results below this score</span></label>
+        <div style="font-size:11px;color:#64748b;margin-bottom:6px;">Jobs scoring below this threshold won't appear in results (they land in the Unscored section instead). Default: 5.</div>
+        <input id="st-min-score" type="number" min="1" max="10" step="1" class="form-input" style="width:80px;" />
       </div>
     </div>
     <div class="settings-section">
@@ -823,7 +833,7 @@ const PRELOADED_TIMESTAMP = null; // Set by daily task injection
             <span style="font-weight:400;color:#f59e0b;">⚠ rate limited — keep list short</span>
           </label>
           <textarea id="st-indeed" rows="6" placeholder="senior QA engineer&#10;SDET&#10;test automation engineer"></textarea>
-          <div style="font-size:11px;color:#94a3b8;margin-top:4px;">Optionally add a location per line: <code style="background:#f1f5f9;padding:1px 4px;border-radius:3px;">senior QA engineer | Denver CO</code>. Defaults to remote.</div>
+          <div style="font-size:11px;color:#94a3b8;margin-top:4px;">Searches are automatically run for each selected Work Arrangement (remote + local) based on your Location setting. You can override per-line with: <code style="background:#f1f5f9;padding:1px 4px;border-radius:3px;">senior QA engineer | Denver CO</code></div>
         </div>
         <div class="settings-field">
           <label style="font-size:12px;display:flex;align-items:center;gap:8px;">
@@ -1008,6 +1018,7 @@ const DEFAULT_SETTINGS = {
   scorePenaltyTerms: [],
   scoreTitleRequire: '',
   scoringCap: 60,
+  minScoreThreshold: 5,
   showDismissedTab: false,
   enableDice: true, enableIndeed: true, enableZR: true,
   searchTerms: null,
@@ -1021,26 +1032,44 @@ function getSettings() {
 function setSettings(s) { try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(s)); } catch {} }
 function getEffectiveDiceSearches() {
   const s = getSettings();
-  // Per-board terms → fallback to old searchTerms (migration) → fallback to hardcoded defaults
-  const terms = s.diceSearchTerms && s.diceSearchTerms.length ? s.diceSearchTerms
+  const baseTerms = s.diceSearchTerms && s.diceSearchTerms.length ? s.diceSearchTerms
     : s.searchTerms && s.searchTerms.length ? s.searchTerms
     : DICE_SEARCHES.map(t => t.replace(/ remote$/i, '').trim());
-  const wantsRemote = !s.workArrangements || s.workArrangements.includes('remote');
-  return [...new Set(terms.map(t => t.trim()).filter(Boolean).map(t => {
-    if (!wantsRemote || /\bremote\b/i.test(t)) return t;
-    return t + ' remote';
-  }))];
+  const wantsRemote  = !s.workArrangements || s.workArrangements.includes('remote');
+  const wantsLocal   = s.workArrangements && (s.workArrangements.includes('hybrid') || s.workArrangements.includes('on-site'));
+  const userLocation = s.location ? s.location.split(',')[0].trim() : ''; // city only
+  const out = [];
+  for (const t of baseTerms.map(t => t.trim()).filter(Boolean)) {
+    if (/\bremote\b/i.test(t) || /\|/.test(t)) { out.push(t); continue; } // already qualified
+    if (wantsRemote) out.push(t + ' remote');
+    if (wantsLocal)  out.push(t); // plain term — no city suffix, let the board use geographic context
+    if (!wantsRemote && !wantsLocal) out.push(t); // fallback
+  }
+  return [...new Set(out)];
 }
 function getEffectiveIndeedSearches() {
   const s = getSettings();
   const lines = s.indeedSearchTerms && s.indeedSearchTerms.length ? s.indeedSearchTerms
     : s.searchTerms && s.searchTerms.length ? s.searchTerms
     : INDEED_SEARCHES.map(x => x.q);
-  const seen = new Set();
-  return lines.map(line => {
-    const [q, loc] = line.split('|').map(x => x.trim());
-    return { q: q || line.trim(), loc: loc || 'remote' };
-  }).filter(x => { if (!x.q || seen.has(x.q)) return false; seen.add(x.q); return true; });
+  const wantsRemote  = !s.workArrangements || s.workArrangements.includes('remote');
+  const wantsLocal   = s.workArrangements && (s.workArrangements.includes('hybrid') || s.workArrangements.includes('on-site'));
+  const userLocation = s.location || '';
+  const seen = new Set(); const out = [];
+  for (const line of lines) {
+    const hasExplicitLoc = line.includes('|');
+    if (hasExplicitLoc) {
+      const [q, loc] = line.split('|').map(x => x.trim());
+      if (q && !seen.has(q + '|' + loc)) { seen.add(q + '|' + loc); out.push({ q, loc: loc || 'remote' }); }
+      continue;
+    }
+    const q = line.trim();
+    if (!q) continue;
+    if (wantsRemote  && !seen.has(q + '|remote'))       { seen.add(q + '|remote');       out.push({ q, loc: 'remote' }); }
+    if (wantsLocal && userLocation && !seen.has(q + '|' + userLocation)) { seen.add(q + '|' + userLocation); out.push({ q, loc: userLocation }); }
+    if (!wantsRemote && !wantsLocal && !seen.has(q))    { seen.add(q);                    out.push({ q, loc: '' }); }
+  }
+  return out;
 }
 function getEffectiveZrSearches() {
   const s = getSettings();
@@ -1925,6 +1954,21 @@ function formatDate(str) {
   return diff === 0 ? 'Today' : diff === 1 ? '1d ago' : diff + 'd ago';
 }
 function setStatus(msg) { const el = document.getElementById('status-msg'); if (el) el.textContent = msg; }
+function renderFetchStats() {
+  const el = document.getElementById('fetch-stats-bar');
+  if (!el) return;
+  try {
+    const c = JSON.parse(localStorage.getItem('_lastFetchCounts') || 'null');
+    if (!c) { el.style.display = 'none'; return; }
+    const parts = [];
+    if (c.dice   != null) parts.push(`Dice ${c.dice}`);
+    if (c.indeed != null) parts.push(`Indeed ${c.indeed}`);
+    if (c.zr     != null) parts.push(`ZipRecruiter ${c.zr}`);
+    const summary = parts.join(' · ') + (c.unique != null ? ` → ${c.unique} unique after dedup` : '');
+    el.textContent = `Last fetch: ${summary}`;
+    el.style.display = 'block';
+  } catch { el.style.display = 'none'; }
+}
 
 // ─── Hybrid location filter ───────────────────────────────────────────────────
 // Update this with cities in your commute radius (or use the Auto-fill button in Settings)
@@ -1995,47 +2039,82 @@ function keywordScore(job, penaltyTerms, skillsItems) {
   return Math.min(10, s);
 }
 
-async function scoreJobs(jobs) {
-  if (!jobs.length) return null;
-  const list = jobs.map((j,i) =>
-    `[${i+1}] "${j.title}" at ${j.companyName} | ${(j.workplaceTypes||[]).join('/')||'unknown'} | Salary: ${j.salary||'not listed'} | Source: ${j.source}\nSummary: ${(j.summary||'').slice(0,200)}`
-  ).join('\n\n');
+const SCORE_BATCH_SIZE   = 30;
+const SCORE_MAX_CONCURRENT = 2;
+
+function _buildScoringHeader() {
   const cfg = getSettings();
+  const profileText = (cfg.profile && cfg.profile.trim()) ? cfg.profile.trim() : null;
+  if (!profileText) {
+    setStatus('Please fill in your profile in Settings → Profile before scoring.');
+    return null;
+  }
   const metro = cfg.localMetroCities && cfg.localMetroCities.length
     ? cfg.localMetroCities.slice(0,4).join(', ')
     : (cfg.location ? cfg.location : 'the candidate\'s local area');
-  const penaltyTerms = cfg.scorePenaltyTerms || [];
-  const penaltyLine = penaltyTerms.length
-    ? `\n- Job primarily requires ${penaltyTerms.join(', ')} (not in candidate's stack) = subtract 1`
-    : '';
   const skills = (cfg.skillsItems || []).filter(sk => sk.confidence >= 3).sort((a,b) => b.confidence - a.confidence);
   const skillsLine = skills.length
     ? `\nCandidate skills (years / confidence 1-5):\n${skills.map(sk => `  ${sk.name}: ${sk.years||'?'} yrs, ${sk.confidence}/5`).join('\n')}\nBoost when job requires skills with confidence 4-5. Check "X+ years required" against candidate years.`
     : '';
-  const prompt = `Score these ${jobs.length} job listings for this candidate:
-${PROFILE}${getDismissalContext()}${skillsLine}
+  return `Score these BATCH_COUNT job listings for this candidate:
+${profileText}${getDismissalContext()}${skillsLine}
 
-SCORING: 9-10=QE/SDET/test-automation, remote/hybrid, matching stack. 7-8=good fit. 5-6=partial. 1-4=poor.
+SCORING: 9-10=excellent match for candidate profile, remote/hybrid, strong stack alignment. 7-8=good fit. 5-6=partial match. 1-4=poor fit.
 ADJUSTMENTS:
 - Security clearance OR defense/military/homeland = subtract 2 (min 1)
-- Hybrid role outside ${metro} = score 0 (auto-exclude)${penaltyLine}
+- Hybrid role outside ${metro} = score 0 (auto-exclude)
 - Do NOT penalise mid-level or non-senior titles (e.g. "Engineer II") — seniority alone is not a negative signal.
+- Use the skills list to gauge fit — boost score when the job emphasises skills the candidate has at confidence 4-5.
 
 JOBS:
-${list}
+BATCH_JOBS
 
 Return ONLY a valid JSON array, no markdown:
 [{"index":1,"score":8,"reason":"Senior SDET, Python/API automation, fully remote"}]`;
+}
+
+async function _scoreJobsBatch(jobs, globalOffset, headerTemplate, retries = 1) {
+  const list = jobs.map((j,i) =>
+    `[${i+1}] "${j.title}" at ${j.companyName} | ${(j.workplaceTypes||[]).join('/')||'unknown'} | Salary: ${j.salary||'not listed'} | Source: ${j.source}\nSummary: ${(j.summary||'').slice(0,200)}`
+  ).join('\n\n');
+  const prompt = headerTemplate
+    .replace('BATCH_COUNT', jobs.length)
+    .replace('BATCH_JOBS', list);
   try {
     const result = await window.cowork.askClaude(prompt, []);
     const resultStr = typeof result === 'string' ? result : (result?.text || result?.content || JSON.stringify(result));
     const match = resultStr.match(/\[[\s\S]*?\]/);
     if (match) {
       const parsed = JSON.parse(match[0]);
-      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      if (Array.isArray(parsed) && parsed.length > 0)
+        return parsed.map(r => ({ ...r, index: r.index + globalOffset })); // remap to global 1-based index
     }
     return null;
-  } catch { return null; }
+  } catch {
+    if (retries > 0) return _scoreJobsBatch(jobs, globalOffset, headerTemplate, retries - 1);
+    return null;
+  }
+}
+
+async function scoreJobs(jobs) {
+  if (!jobs.length) return null;
+  const headerTemplate = _buildScoringHeader();
+  if (!headerTemplate) return null; // profile missing — setStatus already called
+
+  // Split into batches
+  const batches = [];
+  for (let i = 0; i < jobs.length; i += SCORE_BATCH_SIZE)
+    batches.push({ slice: jobs.slice(i, i + SCORE_BATCH_SIZE), offset: i });
+
+  const allResults = [];
+  for (let i = 0; i < batches.length; i += SCORE_MAX_CONCURRENT) {
+    const chunk = batches.slice(i, i + SCORE_MAX_CONCURRENT);
+    const results = await Promise.all(
+      chunk.map(b => _scoreJobsBatch(b.slice, b.offset, headerTemplate))
+    );
+    for (const r of results) if (r) allResults.push(...r);
+  }
+  return allResults.length ? allResults : null;
 }
 
 // ─── Skills tab ──────────────────────────────────────────────────────────────
@@ -2224,9 +2303,16 @@ async function searchIndeed(q, loc, progress = '') {
 const ZR_SEARCHES = ['software engineer', 'senior developer', 'staff engineer'];
 async function searchZipRecruiter(jobRole) {
   try {
+    const cfg = getSettings();
+    const arrangements = cfg.workArrangements || ['remote'];
+    const locationTypes = [];
+    if (arrangements.includes('remote'))   locationTypes.push('REMOTE');
+    if (arrangements.includes('hybrid'))   locationTypes.push('HYBRID');
+    if (arrangements.includes('on-site'))  locationTypes.push('IN_PERSON');
+    if (!locationTypes.length) locationTypes.push('REMOTE'); // fallback
     const r = await window.cowork.callMcpTool(ZR_TOOL, {
       job_role: jobRole,
-      location_types: ['REMOTE'],
+      location_types: locationTypes,
       employment_types: ['FULL_TIME'],
       seniority_classes: ['MID', 'SENIOR'],
     });
@@ -2300,7 +2386,10 @@ function renderJobRows() {
           </div>
           <div class="reason">${esc(j.matchReason||'')}</div>
         </td>
-        <td style="color:#444;font-size:13px;">${esc(j.companyName||'')}</td>
+        <td style="color:#444;font-size:13px;">
+          <div>${esc(j.companyName||'')}</div>
+          ${j.jobLocation?.displayName ? `<div style="font-size:11px;color:#94a3b8;">${esc(j.jobLocation.displayName)}</div>` : ''}
+        </td>
         <td><span class="type-badge ${ti.cls}">${ti.label}</span></td>
         <td class="salary">${esc(j.salary||'—')}</td>
         <td class="date-cell">${formatDate(j.postedDate)}</td>
@@ -2351,7 +2440,10 @@ function renderUnscoredRows() {
           <span class="badge ${sourceBadgeClass(j.source)}">${j.source}</span></div>
         <div class="reason" style="color:#94a3b8;">${esc(j.matchReason)}</div>
       </td>
-      <td style="color:#444;font-size:13px;">${esc(j.companyName||'')}</td>
+      <td style="color:#444;font-size:13px;">
+        <div>${esc(j.companyName||'')}</div>
+        ${j.jobLocation?.displayName ? `<div style="font-size:11px;color:#94a3b8;">${esc(j.jobLocation.displayName)}</div>` : ''}
+      </td>
       <td><span class="type-badge ${ti.cls}">${ti.label}</span></td>
       <td class="salary">${esc(j.salary||'—')}</td>
       <td class="date-cell">${formatDate(j.postedDate)}</td>
@@ -2370,6 +2462,49 @@ function toggleUnscoredSection(show) {
   if (show) renderUnscoredRows();
 }
 
+async function scoreBulkUnscored() {
+  const btn = document.getElementById('btn-bulk-score');
+  const nInput = document.getElementById('bulk-score-n');
+  const cfg = getSettings();
+  const threshold = cfg.minScoreThreshold ?? 5;
+  const n = Math.min(Math.max(1, parseInt(nInput?.value) || 20), UNSCORED_JOBS.length);
+  const toScore = UNSCORED_JOBS.slice(0, n);
+  if (!toScore.length) return;
+  if (btn) { btn.disabled = true; btn.textContent = `Scoring ${toScore.length}…`; }
+  try {
+    const results = await scoreJobs(toScore);
+    if (!results) { if (btn) { btn.disabled = false; btn.textContent = 'Score Next'; } return; }
+    let promoted = 0;
+    let firstPromotedGuid = null;
+    for (const r of results) {
+      const job = toScore[r.index - 1]; // scoreJobs returns {index, score, reason} — index is 1-based
+      if (!job) continue;
+      job.matchScore  = r.score;
+      job.matchReason = r.reason;
+      // Always remove from UNSCORED_JOBS — job has been evaluated regardless of score
+      UNSCORED_JOBS = UNSCORED_JOBS.filter(j => j.guid !== job.guid);
+      if (r.score >= threshold) {
+        CURRENT_SCORED = [...CURRENT_SCORED, {...job, matchScore: r.score, matchReason: r.reason}]
+          .sort((a,b) => b.matchScore - a.matchScore);
+        JOB_MAP[job.guid] = job;
+        if (!firstPromotedGuid) firstPromotedGuid = job.guid;
+        promoted++;
+      }
+    }
+    renderJobRows();
+    renderUnscoredRows();
+    const label = document.getElementById('unscored-toggle-label');
+    if (label) label.textContent = `Show ${UNSCORED_JOBS.length} unscored results (keyword estimates only)`;
+    if (btn) { btn.disabled = false; btn.textContent = 'Score Next'; }
+    if (firstPromotedGuid) {
+      const newRow = document.getElementById(`job-row-${firstPromotedGuid}`);
+      if (newRow) { newRow.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); newRow.classList.add('row-highlight'); setTimeout(() => newRow.classList.remove('row-highlight'), 2500); }
+    }
+  } catch(e) {
+    if (btn) { btn.disabled = false; btn.textContent = 'Score Next'; }
+  }
+}
+
 async function quickScoreJob(guid, btn) {
   const job = UNSCORED_JOBS.find(j => j.guid === guid);
   if (!job) return;
@@ -2383,7 +2518,7 @@ async function quickScoreJob(guid, btn) {
       job.matchScore  = s.score;
       job.matchReason = s.reason;
       // If it scores well enough, move it into main results
-      if (s.score >= 5) {
+      if (s.score >= (getSettings().minScoreThreshold ?? 5)) {
         CURRENT_SCORED = [...CURRENT_SCORED, {...job, matchScore: s.score, matchReason: s.reason}]
           .sort((a,b) => b.matchScore - a.matchScore);
         UNSCORED_JOBS = UNSCORED_JOBS.filter(j => j.guid !== guid);
@@ -2456,7 +2591,7 @@ function renderMatches(scored, newJobIds, scoringFailed, fetchedAt, source) {
   const chk = document.getElementById('chk-show-unscored');
   if (UNSCORED_JOBS.length) {
     document.getElementById('unscored-toggle-label').textContent = `Show ${UNSCORED_JOBS.length} unscored results (keyword estimates only)`;
-    toggleRow.style.display = 'block';
+    toggleRow.style.display = 'flex';
   } else {
     toggleRow.style.display = 'none';
   }
@@ -2516,7 +2651,7 @@ async function run(forceSearch = false) {
     const preloadedAppliedKeys   = getAppliedJobKeys();
     const preloadedDismissedKeys = getDismissedJobKeys();
     scored    = PRELOADED_JOBS.filter(j => {
-      if (j.matchScore < 5) return false;
+      if (j.matchScore < (cfg.minScoreThreshold ?? 5)) return false;
       if (dismissed.has(j.guid)) return false;
       if (isHybridOutsideLocalArea(j)) return false;
       if (isNonSalaried(j)) return false;
@@ -2572,6 +2707,7 @@ async function run(forceSearch = false) {
         setStatus(`Indeed: ${indeedCount} jobs found${window._skipIndeed ? ' (skipped)' : ''}. Moving to ZipRecruiter…`);
         await new Promise(res => setTimeout(res, 1500));
       }
+      const beforeZR = allJobs.length;
       if (cfg.enableZR !== false) {
         for (let i=0; i<effZR.length; i++) {
           if (searchAborted) throw new Error('cancelled');
@@ -2580,6 +2716,12 @@ async function run(forceSearch = false) {
             if (!seen.has(j.guid)) { seen.add(j.guid); allJobs.push(j); }
         }
       }
+      const rawCounts = {
+        dice:  cfg.enableDice  !== false ? (allJobs.filter(j => j.source === 'Dice').length)          : null,
+        indeed: cfg.enableIndeed !== false ? (allJobs.filter(j => j.source === 'Indeed').length)       : null,
+        zr:    cfg.enableZR    !== false ? (allJobs.filter(j => j.source === 'ZipRecruiter').length)   : null,
+        total: allJobs.length,
+      };
       if (searchAborted) throw new Error('cancelled');
       // Content-key dedup: GUID-only seen-set above misses same job posted twice with different IDs.
       // Collapse by stripped URL and by company|title (location-agnostic).
@@ -2600,6 +2742,10 @@ async function run(forceSearch = false) {
           deduped.push(j);
         }
       }
+      // Save fetch counts for persistent stats bar
+      rawCounts.unique = deduped.length;
+      try { localStorage.setItem('_lastFetchCounts', JSON.stringify(rawCounts)); } catch {}
+      renderFetchStats();
       // Pre-score title gate: drop jobs whose title matches none of the required terms
       const titleRequireRaw = cfg.scoreTitleRequire || '';
       const titleTerms = titleRequireRaw.split(',').map(t => t.trim().toLowerCase()).filter(Boolean);
@@ -2640,7 +2786,7 @@ async function run(forceSearch = false) {
           matchReason: scoreMap[i]?.reason ?? (scoringFailed ? 'keyword match' : ''),
         }))
         .filter(j => {
-          if (j.matchScore < 5) return false;
+          if (j.matchScore < (cfg.minScoreThreshold ?? 5)) return false;
           if (dismissed.has(j.guid)) return false;
           if (isHybridOutsideLocalArea(j)) return false;
           if (isNonSalaried(j)) return false;
@@ -2888,6 +3034,7 @@ function loadSettingsForm() {
   document.getElementById('st-title-require').value  = s.scoreTitleRequire || '';
   document.getElementById('st-penalty-terms').value  = (s.scorePenaltyTerms || []).join(', ');
   document.getElementById('st-scoring-cap').value    = s.scoringCap ?? 60;
+  document.getElementById('st-min-score').value      = s.minScoreThreshold ?? 5;
   document.getElementById('st-show-dismissed').checked = !!s.showDismissedTab;
   applyDismissedTabVisibility(!!s.showDismissedTab);
   document.getElementById('st-enable-dice').checked    = s.enableDice    !== false;
@@ -2960,6 +3107,7 @@ function saveSettingsForm() {
     scorePenaltyTerms: document.getElementById('st-penalty-terms').value
       .split(',').map(t => t.trim().toLowerCase()).filter(Boolean),
     scoringCap: Math.max(10, parseInt(document.getElementById('st-scoring-cap').value) || 60),
+    minScoreThreshold: Math.min(10, Math.max(1, parseInt(document.getElementById('st-min-score').value) || 5)),
     showDismissedTab: document.getElementById('st-show-dismissed').checked,
     enableDice:    document.getElementById('st-enable-dice').checked,
     enableIndeed:  document.getElementById('st-enable-indeed').checked,
@@ -3060,6 +3208,7 @@ async function checkForUpdates() {
 // fully defined before run() → initResumes() tries to reference it.
 updateActFormFields();
 applyDismissedTabVisibility(!!getSettings().showDismissedTab);
+renderFetchStats();
 run();
 initAutoBackup();
 checkForUpdates();
